@@ -7,6 +7,7 @@ import (
 	"os"
 	"github.com/joho/godotenv"
 	"ledgerbolt.systems/internal/handlers"
+	"ledgerbolt.systems/internal/middleware"
 )
 
 
@@ -22,7 +23,7 @@ func main() {
 
 	port := os.Getenv("PORT")
 	fmt.Printf("Server started on PORT: %s...", port)
-    servErr := http.ListenAndServe(":" + port, mux)
+    servErr := http.ListenAndServe(":" + port, middleware.SetCommonHeaders(mux))
 
 	if servErr != nil {
 		log.Fatal(500, servErr)
