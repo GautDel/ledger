@@ -1,27 +1,50 @@
 package handlers
 
 import (
+	"context"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
+
+	"github.com/jackc/pgx/v5"
+	"ledgerbolt.systems/internal/db"
 )
 
-type Info struct {
-	Title string
-	Desc  string
-	Usage string
+type Test struct {
+	Name        string
+	Description string
 }
 
 func homeHandler(w http.ResponseWriter, r *http.Request) {
+	conn := db.GetPool()
 
-	info := Info{
-		Title: "Ledger is an accounting API to be used by Aoife McNamara.",
-		Desc:  "It will allow her to save clients in a database, as well as invoices, and will create PDF automatically.",
-		Usage: "Docs are coming soon!",
+	var tests []Test
+    var test Test
+
+	rows, err := conn.Query(context.Background(), "SELECT * FROM test")
+	if err != nil {
+		log.Fatal(err)
 	}
 
-    encoderErr := json.NewEncoder(w).Encode(info) 
-    if encoderErr != nil {
-        log.Println("Failed to Encode JSON", encoderErr)
-    }
+	_, err = pgx.ForEachRow(rows, 
+        []any{
+            &test.Name, 
+            &test.Description,
+        }, func() error {
+
+        tests = append(tests, test)
+
+		return nil
+	})
+
+	if err != nil {
+		fmt.Printf("ForEachRow error: %v", err)
+		return
+	}
+
+	encoderErr := json.NewEncoder(w).Encode(tests)
+	if encoderErr != nil {
+		log.Println("Failed to Encode JSON", encoderErr)
+	}
 }

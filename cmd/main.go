@@ -21,9 +21,9 @@ func main() {
 	}
 
 	// ESTABLISH DATABASE CONNECTION //
-    db.Connect(os.Getenv("DB_URL"))
+	db.Connect(os.Getenv("DB_URL"))
 
-    // INITIALIZE ROUTES/SERVER //
+	// INITIALIZE ROUTES/SERVER //
 	mux := http.NewServeMux()
 
 	handlers.ApiRouter(mux)
@@ -32,8 +32,8 @@ func main() {
 
 	fmt.Printf("Server started on PORT: %s...", port)
 
-	servErr := http.ListenAndServe(":"+port, middleware.SetCommonHeaders(mux))
-	if servErr != nil {
-		log.Fatal(500, servErr)
+	err = http.ListenAndServe(":"+port, middleware.SetCommonHeaders(mux))
+	if err != nil {
+		log.Fatal(500, err)
 	}
 }

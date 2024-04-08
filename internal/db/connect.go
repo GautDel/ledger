@@ -8,11 +8,19 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
+var dbPool *pgxpool.Pool
+
 func Connect(dbConnURL string) {
 
     fmt.Println("Attempting database connection...")
 
-	pool, err := pgxpool.New(context.Background(), dbConnURL)
+    poolConfig, err := pgxpool.ParseConfig(dbConnURL)
+    if err != nil {
+        log.Fatal(err)
+        return
+    }
+
+    pool, err := pgxpool.NewWithConfig(context.Background(), poolConfig)
 	if err != nil {
 		log.Fatal("Could not connect to Database", err)
 	}
@@ -22,5 +30,11 @@ func Connect(dbConnURL string) {
 		log.Fatal(err)
 	}
 
+    dbPool = pool
+
     fmt.Println("Connection to database successful!")
+}
+
+func GetPool() *pgxpool.Pool {
+    return dbPool
 }
