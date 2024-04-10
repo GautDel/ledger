@@ -1,15 +1,15 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 	"os"
 
 	"github.com/joho/godotenv"
+
+	"ledgerbolt.systems/internal/auth"
 	"ledgerbolt.systems/internal/db"
 	"ledgerbolt.systems/internal/handlers"
-	"ledgerbolt.systems/internal/middleware"
 )
 
 func main() {
@@ -23,17 +23,18 @@ func main() {
 	// ESTABLISH DATABASE CONNECTION //
 	db.Connect(os.Getenv("DB_URL"))
 
-	// INITIALIZE ROUTES/SERVER //
-	mux := http.NewServeMux()
+	auth, err := auth.New()
+	if err != nil {
+		log.Fatalf("Failed to initialize the authenticator: %v", err)
+	}
 
-	handlers.ApiRouter(mux)
+	rtr := handlers.New(auth)
 
 	port := os.Getenv("PORT")
+	host := os.Getenv("HOST")
 
-	fmt.Printf("Server started on PORT: %s...", port)
-
-	err = http.ListenAndServe(":"+port, middleware.SetCommonHeaders(mux))
-	if err != nil {
-		log.Fatal(500, err)
+	log.Print("Server listening on http://" + host + ":" + port)
+	if err := http.ListenAndServe(host + ":" + port, rtr); err != nil {
+		log.Fatalf("There was an error with the http server: %v", err)
 	}
 }

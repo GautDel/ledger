@@ -2,10 +2,11 @@ package handlers
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
+
+	"github.com/gin-gonic/gin"
 
 	"github.com/jackc/pgx/v5"
 	"ledgerbolt.systems/internal/db"
@@ -16,7 +17,7 @@ type Test struct {
 	Description string
 }
 
-func homeHandler(w http.ResponseWriter, r *http.Request) {
+func homeHandler(c *gin.Context) {
 	conn := db.GetPool()
 
 	var tests []Test
@@ -43,8 +44,5 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	encoderErr := json.NewEncoder(w).Encode(tests)
-	if encoderErr != nil {
-		log.Println("Failed to Encode JSON", encoderErr)
-	}
+    c.JSON(http.StatusOK, tests)
 }
