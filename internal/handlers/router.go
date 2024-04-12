@@ -11,7 +11,6 @@ import (
 	"ledgerbolt.systems/internal/middleware"
 )
 
-// New registers the routes and returns the router.
 func New(auth *auth.Authenticator) *gin.Engine {
 	router := gin.Default()
 
@@ -29,10 +28,9 @@ func New(auth *auth.Authenticator) *gin.Engine {
 		authRouter.GET("/login", loginHandler(auth))
 		authRouter.GET("/logout", logoutHandler)
 		authRouter.GET("/callback", callbackHandler(auth))
-
 	}
 
-    clientRouter := router.Group("/clients")
+    clientRouter := router.Group("/clients", middleware.IsAuthenticated)
     {
         clientRouter.GET("/", getClientsHandler)
         clientRouter.GET("/search", searchClientsHandler)

@@ -6,6 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
+	"ledgerbolt.systems/internal/auth"
 	"ledgerbolt.systems/internal/db"
 	"ledgerbolt.systems/internal/models"
 )
@@ -13,17 +14,21 @@ import (
 type ClientRB struct {
 	FirstName   string `json:"FirstName" validate:"required,min=3,max=50"`
 	LastName    string `json:"LastName" validate:"required,min=3,max=50"`
-	Description string `json:"Description" validate:"required,max=2000"`
+	Description string `json:"Description" validate:"max=2000"`
+    Email       string `json:"Email" validate:"required,min=5,max=320"`
+	Phone       string `json:"Phone" validate:"required,min=5,max=50"`
+	Address     string `json:"Address" validate:"required,min=5,max=1000"`
+	Country     string `json:"Country" validate:"required,max=255"`
 }
 
 type SearchRB struct {
-    Search string `json:"Search"`
+	Search string `json:"Search"`
 }
 
 func getClientsHandler(ctx *gin.Context) {
 	conn := db.GetPool()
 
-	clients, err := models.GetClients(conn, ctx)
+	clients, err := models.GetClients(conn, ctx, auth.GetUser(ctx))
 	if err != nil {
 		log.Println(err)
 		ctx.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to retrieve clients from database", "error": err})
@@ -37,7 +42,7 @@ func getClientHandler(ctx *gin.Context) {
 	conn := db.GetPool()
 	clientID := ctx.Param("id")
 
-	client, err := models.GetClient(conn, clientID, ctx)
+	client, err := models.GetClient(conn, clientID, ctx, auth.GetUser(ctx))
 	if err != nil {
 		log.Println(err)
 		ctx.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to retrieve client from database", "error": err})
@@ -48,16 +53,16 @@ func getClientHandler(ctx *gin.Context) {
 }
 
 func searchClientsHandler(ctx *gin.Context) {
-    conn := db.GetPool()
+	conn := db.GetPool()
 
-    var reqBody SearchRB
-    err := ctx.ShouldBindJSON(&reqBody)
+	var reqBody SearchRB
+	err := ctx.ShouldBindJSON(&reqBody)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Failed to find clients", "error": err})
 		return
 	}
-    
-    clients, err := models.SearchClients(conn, reqBody.Search, ctx) 
+
+	clients, err := models.SearchClients(conn, reqBody.Search, ctx, auth.GetUser(ctx))
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Failed to find clients", "error": err})
 		return
@@ -68,6 +73,7 @@ func searchClientsHandler(ctx *gin.Context) {
 
 func newClientHandler(ctx *gin.Context) {
 	conn := db.GetPool()
+
 
 	var reqBody ClientRB
 	err := ctx.ShouldBindJSON(&reqBody)
@@ -86,9 +92,13 @@ func newClientHandler(ctx *gin.Context) {
 		FirstName:   reqBody.FirstName,
 		LastName:    reqBody.LastName,
 		Description: reqBody.Description,
+		Email: reqBody.Email,
+		Phone: reqBody.Phone,
+		Address: reqBody.Address,
+		Country: reqBody.Country,
 	}
 
-	err = models.NewClient(conn, client, ctx)
+	err = models.NewClient(conn, client, ctx, auth.GetUser(ctx))
 	if err != nil {
 		log.Println(err)
 		ctx.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to create client", "error": err})
@@ -100,7 +110,7 @@ func newClientHandler(ctx *gin.Context) {
 
 func updateClientHandler(ctx *gin.Context) {
 	conn := db.GetPool()
-    clientID := ctx.Param("id")
+	clientID := ctx.Param("id")
 
 	var reqBody ClientRB
 	err := ctx.ShouldBindJSON(&reqBody)
@@ -121,7 +131,7 @@ func updateClientHandler(ctx *gin.Context) {
 		Description: reqBody.Description,
 	}
 
-	err = models.UpdateClient(conn, client, ctx, clientID)
+	err = models.UpdateClient(conn, client, ctx, clientID, auth.GetUser(ctx))
 	if err != nil {
 		log.Println(err)
 		ctx.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to update client", "error": err})
@@ -132,14 +142,13 @@ func updateClientHandler(ctx *gin.Context) {
 }
 
 func destroyClientHandler(ctx *gin.Context) {
-    conn := db.GetPool()
-    clientID := ctx.Param("id")
+	conn := db.GetPool()
+	clientID := ctx.Param("id")
 
-    err := models.DestroyClient(conn, clientID, ctx)
-    if err != nil {
-        ctx.JSON(http.StatusInternalServerError, gin.H{"message": "Couldn't delete client", "error": err})
-    }
-
+	err := models.DestroyClient(conn, clientID, ctx, auth.GetUser(ctx))
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"message": "Couldn't delete client", "error": err})
+	}
 
 	ctx.JSON(http.StatusOK, gin.H{"message": "Successfully removed client!"})
 }

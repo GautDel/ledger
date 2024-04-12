@@ -14,6 +14,10 @@ type Client struct {
 	FirstName   string
 	LastName    string
 	Description string
+	Email       string
+	Phone       string
+	Address     string
+	Country     string
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
 }
@@ -22,14 +26,30 @@ type ClientRequest struct {
 	FirstName   string
 	LastName    string
 	Description string
+	Email       string
+	Phone       string
+	Address     string
+	Country     string
 }
 
-func GetClients(conn *pgxpool.Pool, ctx *gin.Context) ([]Client, error) {
+func GetClients(conn *pgxpool.Pool, ctx *gin.Context, userID string) ([]Client, error) {
 	var clients []Client
 	var client Client
-	query := "SELECT * from clients"
+	query := `SELECT 
+        id,
+        first_name,
+        last_name,
+        description,
+        email,
+        phone,
+        address,
+        country,
+        created_at,
+        updated_at
+        FROM clients 
+        WHERE user_id = $1`
 
-	rows, err := conn.Query(ctx, query)
+	rows, err := conn.Query(ctx, query, userID)
 	if err != nil {
 		return clients, err
 	}
@@ -40,6 +60,10 @@ func GetClients(conn *pgxpool.Pool, ctx *gin.Context) ([]Client, error) {
 			&client.FirstName,
 			&client.LastName,
 			&client.Description,
+			&client.Email,
+			&client.Phone,
+			&client.Address,
+			&client.Country,
 			&client.CreatedAt,
 			&client.UpdatedAt,
 		}, func() error {
@@ -55,19 +79,31 @@ func GetClients(conn *pgxpool.Pool, ctx *gin.Context) ([]Client, error) {
 	return clients, nil
 }
 
-func GetClient(conn *pgxpool.Pool, clientID string, ctx *gin.Context) (Client, error) {
+func GetClient(conn *pgxpool.Pool, clientID string, ctx *gin.Context, userID string) (Client, error) {
 	var client Client
-	query := "SELECT * FROM clients WHERE id = $1"
-
-	rows := conn.QueryRow(ctx, query, clientID)
+	query := `SELECT 
+        id,
+        first_name,
+        last_name,
+        description,
+        email,
+        phone,
+        address,
+        country
+        FROM clients 
+        WHERE id = $1
+        AND user_id = $2`
+	rows := conn.QueryRow(ctx, query, clientID, userID)
 
 	err := rows.Scan(
 		&client.ID,
 		&client.FirstName,
 		&client.LastName,
 		&client.Description,
-		&client.CreatedAt,
-		&client.UpdatedAt,
+		&client.Email,
+		&client.Phone,
+		&client.Address,
+		&client.Country,
 	)
 	if err != nil {
 		log.Println(err)
@@ -77,11 +113,22 @@ func GetClient(conn *pgxpool.Pool, clientID string, ctx *gin.Context) (Client, e
 	return client, nil
 }
 
-func SearchClients(conn *pgxpool.Pool, searchStr string, ctx *gin.Context) ([]Client, error) {
+func SearchClients(conn *pgxpool.Pool, searchStr string, ctx *gin.Context, userID string) ([]Client, error) {
 	var clients []Client
 	var client Client
 	query := `
-        SELECT * FROM clients
+        SELECT
+        id,
+        first_name,
+        last_name,
+        description,
+        email,
+        phone,
+        address,
+        country,
+        created_at,
+        updated_at
+        FROM clients 
         WHERE first_name ILIKE '%' || $1 || '%'
         OR last_name ILIKE '%' || $1 || '%'`
 
@@ -95,6 +142,10 @@ func SearchClients(conn *pgxpool.Pool, searchStr string, ctx *gin.Context) ([]Cl
 			&client.FirstName,
 			&client.LastName,
 			&client.Description,
+			&client.Email,
+			&client.Phone,
+			&client.Address,
+			&client.Country,
 			&client.CreatedAt,
 			&client.UpdatedAt,
 		}, func() error {
@@ -110,25 +161,45 @@ func SearchClients(conn *pgxpool.Pool, searchStr string, ctx *gin.Context) ([]Cl
 	return clients, nil
 }
 
-func NewClient(conn *pgxpool.Pool, client ClientRequest, ctx *gin.Context) error {
+func NewClient(conn *pgxpool.Pool, client ClientRequest, ctx *gin.Context, userID string) error {
 	query := `
         INSERT INTO clients(
             first_name,
             last_name,
-            description
-        ) VALUES ($1, $2, $3)`
-	_, err := conn.Exec(ctx, query, client.FirstName, client.LastName, client.Description)
+            description,
+            email,
+            phone,
+            address,
+            country,
+            user_id
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`
+	_, err := conn.Exec(
+        ctx, 
+        query, 
+        client.FirstName, 
+        client.LastName, 
+        client.Description, 
+        client.Email, 
+        client.Phone, 
+        client.Address, 
+        client.Country, 
+        userID,
+    )
 
 	return err
 }
 
-func UpdateClient(conn *pgxpool.Pool, client ClientRequest, ctx *gin.Context, clientID string) error {
+func UpdateClient(conn *pgxpool.Pool, client ClientRequest, ctx *gin.Context, clientID string, userID string) error {
 	query := `
         UPDATE clients SET 
         first_name = $1,
         last_name = $2,
         description = $3
-        WHERE id = $4`
+        email = $4
+        phone = $5
+        address = $6
+        country = $7
+        WHERE id = $8 AND user_id = $9`
 
 	_, err := conn.Exec(
 		ctx,
@@ -136,18 +207,23 @@ func UpdateClient(conn *pgxpool.Pool, client ClientRequest, ctx *gin.Context, cl
 		client.FirstName,
 		client.LastName,
 		client.Description,
+		client.Email,
+		client.Phone,
+		client.Address,
+		client.Country,
 		clientID,
+		userID,
 	)
 
 	return err
 }
 
-func DestroyClient(conn *pgxpool.Pool, clientID string, ctx *gin.Context) error {
+func DestroyClient(conn *pgxpool.Pool, clientID string, ctx *gin.Context, userID string) error {
 	query := `
         DELETE FROM clients 
-        WHERE id = $1`
+        WHERE id = $1 AND user_id = $2`
 
-	_, err := conn.Exec(ctx, query, clientID)
+	_, err := conn.Exec(ctx, query, clientID, userID)
 
 	return err
 }

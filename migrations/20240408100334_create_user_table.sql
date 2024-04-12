@@ -1,15 +1,13 @@
 -- +goose Up
 -- +goose StatementBegin
-CREATE TABLE clients (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    first_name VARCHAR(255),
-    last_name VARCHAR(255),
-    description text,
+CREATE TABLE users (
+    id VARCHAR(255) PRIMARY KEY,
+    first_name VARCHAR(255) NOT NULL,
+    last_name VARCHAR(255) NOT NULL,
+    company_name VARCHAR(255) NOT NULL,
     email VARCHAR(320) NOT NULL,
     phone VARCHAR(50) NOT NULL,
     address VARCHAR(1000) NOT NULL,
-    country VARCHAR(255) NOT NULL,
-    user_id VARCHAR(255) REFERENCES users(id),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -17,5 +15,5 @@ CREATE TABLE clients (
 
 -- +goose Down
 -- +goose StatementBegin
-DROP TABLE clients;
+DROP TABLES users;
 -- +goose StatementEnd

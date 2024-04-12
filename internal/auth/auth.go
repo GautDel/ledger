@@ -3,9 +3,13 @@ package auth
 import (
 	"context"
 	"errors"
+	"log"
+	"net/http"
 	"os"
 
 	"github.com/coreos/go-oidc/v3/oidc"
+	"github.com/gin-contrib/sessions"
+	"github.com/gin-gonic/gin"
 	"golang.org/x/oauth2"
 )
 
@@ -51,4 +55,22 @@ func (a *Authenticator) VerifyIDToken(ctx context.Context, token *oauth2.Token) 
 	}
 
 	return a.Verifier(oidcConfig).Verify(ctx, rawIDToken)
+}
+
+// Get current user from context
+func GetUser(ctx *gin.Context) string {
+	profile := sessions.Default(ctx).Get("profile")
+	profileMap, ok := profile.(map[string]interface{})
+	if !ok {
+		log.Println(ok)
+		ctx.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to retrieve clients from database", "error": ok})
+	}
+
+	sub, subErr := profileMap["sub"].(string)
+	if !subErr {
+		log.Println(subErr)
+		ctx.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to retrieve clients from database", "error": subErr})
+	}
+
+    return sub
 }
