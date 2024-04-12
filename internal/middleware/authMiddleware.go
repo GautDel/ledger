@@ -9,7 +9,7 @@ import (
 
 func IsAuthenticated(ctx *gin.Context) {
 	if sessions.Default(ctx).Get("profile") == nil {
-		ctx.Redirect(http.StatusSeeOther, "/login")
+		ctx.Redirect(http.StatusSeeOther, "/auth/login")
 	} else {
 		ctx.Next()
 	}

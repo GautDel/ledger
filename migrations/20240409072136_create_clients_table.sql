@@ -1,11 +1,12 @@
 -- +goose Up
 -- +goose StatementBegin
 CREATE TABLE clients (
-    id int NOT NULL,
-    first_name text,
-    last_name text,
-    user_id text NOT NULL UNIQUE,
-    PRIMARY KEY(id)
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    first_name VARCHAR(255),
+    last_name VARCHAR(255),
+    description text,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 -- +goose StatementEnd
 

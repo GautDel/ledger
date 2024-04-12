@@ -22,13 +22,25 @@ func New(auth *auth.Authenticator) *gin.Engine {
 	store := cookie.NewStore([]byte("secret"))
 	router.Use(sessions.Sessions("auth-session", store))
 
-    authRouter := router.Group("/auth", middleware.IsAuthenticated)
+	router.GET("/", middleware.IsAuthenticated, homeHandler)
+
+	authRouter := router.Group("/auth")
 	{
-		authRouter.GET("/", homeHandler)
 		authRouter.GET("/login", loginHandler(auth))
 		authRouter.GET("/logout", logoutHandler)
 		authRouter.GET("/callback", callbackHandler(auth))
+
 	}
+
+    clientRouter := router.Group("/clients")
+    {
+        clientRouter.GET("/", getClientsHandler)
+        clientRouter.GET("/search", searchClientsHandler)
+        clientRouter.POST("/create", newClientHandler)
+        clientRouter.PUT("/update/:id", updateClientHandler)
+        clientRouter.DELETE("/remove/:id", destroyClientHandler)
+        clientRouter.GET("/:id", getClientHandler)
+    }
 
 	return router
 }

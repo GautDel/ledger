@@ -32,9 +32,9 @@ func main() {
 
 	port := os.Getenv("PORT")
 	host := os.Getenv("HOST")
-
 	log.Print("Server listening on http://" + host + ":" + port)
-	if err := http.ListenAndServe(host + ":" + port, rtr); err != nil {
+	if err := http.ListenAndServe("0.0.0.0:"+port, rtr); err != nil {
 		log.Fatalf("There was an error with the http server: %v", err)
 	}
 }
+
