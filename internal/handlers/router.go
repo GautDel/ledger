@@ -30,15 +30,21 @@ func New(auth *auth.Authenticator) *gin.Engine {
 		authRouter.GET("/callback", callbackHandler(auth))
 	}
 
-    clientRouter := router.Group("/clients", middleware.IsAuthenticated)
-    {
-        clientRouter.GET("/", getClientsHandler)
-        clientRouter.GET("/search", searchClientsHandler)
-        clientRouter.POST("/create", newClientHandler)
-        clientRouter.PUT("/update/:id", updateClientHandler)
-        clientRouter.DELETE("/remove/:id", destroyClientHandler)
-        clientRouter.GET("/:id", getClientHandler)
-    }
+	clientRouter := router.Group("/clients", middleware.IsAuthenticated)
+	{
+		clientRouter.GET("/", getClientsHandler)
+		clientRouter.GET("/search", searchClientsHandler)
+		clientRouter.POST("/create", newClientHandler)
+		clientRouter.PUT("/update/:id", updateClientHandler)
+		clientRouter.DELETE("/remove/:id", destroyClientHandler)
+		clientRouter.GET("/:id", getClientHandler)
+	}
+
+	userRouter := router.Group("/user", middleware.IsAuthenticated)
+	{
+		userRouter.GET("/", GetUserHandler)
+		userRouter.PUT("/update", UpdateUserHandler)
+	}
 
 	return router
 }

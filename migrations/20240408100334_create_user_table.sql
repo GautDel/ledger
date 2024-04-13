@@ -8,6 +8,7 @@ CREATE TABLE users (
     email VARCHAR(320) NOT NULL,
     phone VARCHAR(50) NOT NULL,
     address VARCHAR(1000) NOT NULL,
+    company_num VARCHAR(255),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

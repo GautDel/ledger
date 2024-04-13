@@ -31,7 +31,7 @@ func getClientsHandler(ctx *gin.Context) {
 	clients, err := models.GetClients(conn, ctx, auth.GetUser(ctx))
 	if err != nil {
 		log.Println(err)
-		ctx.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to retrieve clients from database", "error": err})
+		ctx.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to retrieve clients from database", "error": err.Error()})
 		return
 	}
 
@@ -45,7 +45,7 @@ func getClientHandler(ctx *gin.Context) {
 	client, err := models.GetClient(conn, clientID, ctx, auth.GetUser(ctx))
 	if err != nil {
 		log.Println(err)
-		ctx.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to retrieve client from database", "error": err})
+		ctx.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to retrieve client from database", "error": err.Error()})
 		return
 	}
 
@@ -58,13 +58,13 @@ func searchClientsHandler(ctx *gin.Context) {
 	var reqBody SearchRB
 	err := ctx.ShouldBindJSON(&reqBody)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Failed to find clients", "error": err})
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Failed to find clients", "error": err.Error()})
 		return
 	}
 
 	clients, err := models.SearchClients(conn, reqBody.Search, ctx, auth.GetUser(ctx))
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Failed to find clients", "error": err})
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Failed to find clients", "error": err.Error()})
 		return
 	}
 
@@ -78,7 +78,7 @@ func newClientHandler(ctx *gin.Context) {
 	var reqBody ClientRB
 	err := ctx.ShouldBindJSON(&reqBody)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Failed to create client", "error": err})
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Failed to create client", "error": err.Error()})
 		return
 	}
 
@@ -101,7 +101,7 @@ func newClientHandler(ctx *gin.Context) {
 	err = models.NewClient(conn, client, ctx, auth.GetUser(ctx))
 	if err != nil {
 		log.Println(err)
-		ctx.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to create client", "error": err})
+		ctx.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to create client", "error": err.Error()})
 		return
 	}
 
@@ -115,7 +115,7 @@ func updateClientHandler(ctx *gin.Context) {
 	var reqBody ClientRB
 	err := ctx.ShouldBindJSON(&reqBody)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Failed to update client", "error": err})
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Failed to update client", "error": err.Error()})
 		return
 	}
 
@@ -129,12 +129,16 @@ func updateClientHandler(ctx *gin.Context) {
 		FirstName:   reqBody.FirstName,
 		LastName:    reqBody.LastName,
 		Description: reqBody.Description,
+		Email: reqBody.Email,
+		Phone: reqBody.Phone,
+		Address: reqBody.Address,
+		Country: reqBody.Country,
 	}
 
 	err = models.UpdateClient(conn, client, ctx, clientID, auth.GetUser(ctx))
 	if err != nil {
 		log.Println(err)
-		ctx.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to update client", "error": err})
+		ctx.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to update client", "error": err.Error()})
 		return
 	}
 
@@ -147,7 +151,7 @@ func destroyClientHandler(ctx *gin.Context) {
 
 	err := models.DestroyClient(conn, clientID, ctx, auth.GetUser(ctx))
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"message": "Couldn't delete client", "error": err})
+		ctx.JSON(http.StatusInternalServerError, gin.H{"message": "Couldn't delete client", "error": err.Error()})
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{"message": "Successfully removed client!"})
