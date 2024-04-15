@@ -46,5 +46,14 @@ func New(auth *auth.Authenticator) *gin.Engine {
 		userRouter.PUT("/update", UpdateUserHandler)
 	}
 
+	payStatRouter := router.Group("/payment-status", middleware.IsAuthenticated)
+	{
+		payStatRouter.GET("/", getPaymentStatus)
+        payStatRouter.POST("/create", createPaymentStatus)
+        payStatRouter.PUT("/update/:id", updatePaymentStatus)
+        payStatRouter.DELETE("/remove/:id", destroyPaymentStatus)
+        payStatRouter.GET("/:id", getSinglePaymentStatus)
+	}
+
 	return router
 }
