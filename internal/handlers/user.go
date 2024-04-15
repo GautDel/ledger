@@ -5,10 +5,10 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/go-playground/validator/v10"
 	"ledgerbolt.systems/internal/auth"
 	"ledgerbolt.systems/internal/db"
 	"ledgerbolt.systems/internal/models"
+	"ledgerbolt.systems/internal/validator"
 )
 
 type UserRB struct {
@@ -39,14 +39,15 @@ func UpdateUserHandler(ctx *gin.Context) {
 
 	err := ctx.ShouldBindJSON(&reqBody)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Failed to update user", "error": err.Error()})
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Failed to read request body", "error": err.Error()})
 		return
 	}
 
-	validate := validator.New()
-	if err = validate.Struct(reqBody); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
+    err = validator.Validate(&reqBody)
+	if err != nil {
+		log.Println(err)
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Failed to update user", "error": err.Error()})
+        return
 	}
 
 	user := models.UserRequest{

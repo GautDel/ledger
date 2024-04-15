@@ -5,9 +5,9 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/go-playground/validator/v10"
 	"ledgerbolt.systems/internal/db"
 	"ledgerbolt.systems/internal/models"
+	"ledgerbolt.systems/internal/validator"
 )
 
 type PaymentStatusRB struct {
@@ -51,11 +51,13 @@ func createPaymentStatus(ctx *gin.Context) {
 		return
 	}
 
-	validate := validator.New()
-	if err := validate.Struct(reqBody); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
+    err = validator.Validate(&reqBody)
+	if err != nil {
+		log.Println(err)
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Failed to update payment status", "error": err.Error()})
+        return
 	}
+
 
 	paymentStatus := models.PaymentStatus{
 		Status: reqBody.Status,
@@ -82,11 +84,11 @@ func updatePaymentStatus(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Failed to read request body", "error": err.Error()})
 	}
 
-	validate := validator.New()
-    err = validate.Struct(reqBody)
-	if err := validate.Struct(reqBody); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
+    err = validator.Validate(&reqBody)
+	if err != nil {
+		log.Println(err)
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Failed to update payment status", "error": err.Error()})
+        return
 	}
 
     paymentStatus := models.PaymentStatus{

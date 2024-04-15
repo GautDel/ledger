@@ -5,10 +5,10 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/go-playground/validator/v10"
 	"ledgerbolt.systems/internal/auth"
 	"ledgerbolt.systems/internal/db"
 	"ledgerbolt.systems/internal/models"
+	"ledgerbolt.systems/internal/validator"
 )
 
 type ClientRB struct {
@@ -22,7 +22,7 @@ type ClientRB struct {
 }
 
 type SearchRB struct {
-	Search string `json:"Search"`
+    Search string `json:"Search" validate:"required,max=50"`
 }
 
 func getClientsHandler(ctx *gin.Context) {
@@ -58,8 +58,15 @@ func searchClientsHandler(ctx *gin.Context) {
 	var reqBody SearchRB
 	err := ctx.ShouldBindJSON(&reqBody)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Failed to find clients", "error": err.Error()})
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Failed to read request body", "error": err.Error()})
 		return
+	}
+
+    err = validator.Validate(&reqBody)
+	if err != nil {
+		log.Println(err)
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Failed to find client", "error": err.Error()})
+        return
 	}
 
 	clients, err := models.SearchClients(conn, reqBody.Search, ctx, auth.GetUser(ctx))
@@ -74,18 +81,18 @@ func searchClientsHandler(ctx *gin.Context) {
 func newClientHandler(ctx *gin.Context) {
 	conn := db.GetPool()
 
-
 	var reqBody ClientRB
 	err := ctx.ShouldBindJSON(&reqBody)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Failed to create client", "error": err.Error()})
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Failed to read request body", "error": err.Error()})
 		return
 	}
 
-	validate := validator.New()
-	if err := validate.Struct(reqBody); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
+    err = validator.Validate(&reqBody)
+	if err != nil {
+		log.Println(err)
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Failed to create client", "error": err.Error()})
+        return
 	}
 
 	client := models.ClientRequest{
@@ -115,14 +122,15 @@ func updateClientHandler(ctx *gin.Context) {
 	var reqBody ClientRB
 	err := ctx.ShouldBindJSON(&reqBody)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Failed to update client", "error": err.Error()})
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Failed to read request body", "error": err.Error()})
 		return
 	}
 
-	validate := validator.New()
-	if err := validate.Struct(reqBody); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
+    err = validator.Validate(&reqBody)
+	if err != nil {
+		log.Println(err)
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Failed to update client", "error": err.Error()})
+        return
 	}
 
 	client := models.ClientRequest{
@@ -152,6 +160,7 @@ func destroyClientHandler(ctx *gin.Context) {
 	err := models.DestroyClient(conn, clientID, ctx, auth.GetUser(ctx))
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"message": "Couldn't delete client", "error": err.Error()})
+        return
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{"message": "Successfully removed client!"})
