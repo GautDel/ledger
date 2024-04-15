@@ -1,7 +1,7 @@
 -- +goose Up
 -- +goose StatementBegin
 CREATE TABLE clients (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id SERIAL PRIMARY KEY,
     first_name VARCHAR(255),
     last_name VARCHAR(255),
     description text,
@@ -19,3 +19,5 @@ CREATE TABLE clients (
 -- +goose StatementBegin
 DROP TABLE clients;
 -- +goose StatementEnd
+
+
