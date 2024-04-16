@@ -51,6 +51,7 @@ func GetUser(conn *pgxpool.Pool, ctx *gin.Context, userID string) (User, error) 
 		&user.Email,
 		&user.Phone,
 		&user.Address,
+		&user.CompanyNum,
 	)
 	if err != nil {
 		log.Println(err)
@@ -81,7 +82,7 @@ func UpdateUser(conn *pgxpool.Pool, user UserRequest, ctx *gin.Context, userID s
 		user.Email,
 		user.Phone,
 		user.Address,
-        user.CompanyNum,
+		user.CompanyNum,
 		userID,
 	)
 	if err != nil {

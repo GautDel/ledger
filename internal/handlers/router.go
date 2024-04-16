@@ -55,5 +55,15 @@ func New(auth *auth.Authenticator) *gin.Engine {
         payStatRouter.GET("/:id", getSinglePaymentStatus)
 	}
 
+	projectRouter := router.Group("/projects", middleware.IsAuthenticated)
+	{
+		projectRouter.GET("/", getProjects)
+        projectRouter.POST("/create", createProject)
+        projectRouter.PUT("/update/:id", updateProject)
+        projectRouter.DELETE("/remove/:id", destroyProject)
+        projectRouter.GET("/:id", getProject)
+
+        projectRouter.GET("/client/:id", getProjectByClient)
+	}
 	return router
 }

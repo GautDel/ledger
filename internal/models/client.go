@@ -53,6 +53,7 @@ func GetClients(conn *pgxpool.Pool, ctx *gin.Context, userID string) ([]Client, 
 	if err != nil {
 		return clients, err
 	}
+	defer rows.Close()
 
 	_, err = pgx.ForEachRow(rows,
 		[]any{
@@ -136,6 +137,8 @@ func SearchClients(conn *pgxpool.Pool, searchStr string, ctx *gin.Context, userI
 	if err != nil {
 		return clients, err
 	}
+	defer rows.Close()
+
 	_, err = pgx.ForEachRow(rows,
 		[]any{
 			&client.ID,
@@ -174,17 +177,17 @@ func NewClient(conn *pgxpool.Pool, client ClientRequest, ctx *gin.Context, userI
             user_id
         ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`
 	_, err := conn.Exec(
-        ctx, 
-        query, 
-        client.FirstName, 
-        client.LastName, 
-        client.Description, 
-        client.Email, 
-        client.Phone, 
-        client.Address, 
-        client.Country, 
-        userID,
-    )
+		ctx,
+		query,
+		client.FirstName,
+		client.LastName,
+		client.Description,
+		client.Email,
+		client.Phone,
+		client.Address,
+		client.Country,
+		userID,
+	)
 
 	return err
 }
