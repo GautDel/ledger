@@ -9,7 +9,7 @@ CREATE TABLE clients (
     phone VARCHAR(50),
     address VARCHAR(1000),
     country VARCHAR(255) NOT NULL,
-    user_id VARCHAR(255) REFERENCES users(id),
+    user_id VARCHAR(255) REFERENCES users(id) ON DELETE CASCADE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
