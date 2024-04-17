@@ -72,6 +72,7 @@ func New(auth *auth.Authenticator) *gin.Engine {
         invoiceRouter.POST("/create", createInvoice)
         invoiceRouter.PUT("/update/:id", updateInvoice)
         invoiceRouter.DELETE("/remove/:id", destroyInvoice)
+        invoiceRouter.GET("/:id", getInvoice)
 	}
 
 	return router
