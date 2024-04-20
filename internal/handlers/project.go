@@ -3,7 +3,6 @@ package handlers
 import (
 	"log"
 	"net/http"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"ledgerbolt.systems/internal/auth"
@@ -11,13 +10,6 @@ import (
 	"ledgerbolt.systems/internal/models"
 	"ledgerbolt.systems/internal/validator"
 )
-
-type ProjectRB struct {
-	Name        string `json:"Name" validate:"required,min=3,max=50"`
-	Description string `json:"Description" validate:"required,min=3,max=1000"`
-	ClientID    int    `json:"ClientID" validate:"required"`
-	Notes       string `json:"Notes"`
-}
 
 func getProjects(ctx *gin.Context) {
 	conn := db.GetPool()
@@ -58,17 +50,7 @@ func getProject(ctx *gin.Context) {
 
 func getProjectByClient(ctx *gin.Context) {
 	conn := db.GetPool()
-	idStr := ctx.Param("id")
-	clientID, err := strconv.Atoi(idStr)
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest,
-			gin.H{
-				"message": "Failed to read param",
-				"error":   err.Error(),
-			},
-		)
-		return
-	}
+	clientID := ctx.Param("id")
 
 	project, err := models.GetProjectByClient(conn, ctx, auth.GetUser(ctx), clientID)
 	if err != nil {
@@ -87,7 +69,7 @@ func getProjectByClient(ctx *gin.Context) {
 
 func createProject(ctx *gin.Context) {
 	conn := db.GetPool()
-	var reqBody ProjectRB
+	var reqBody models.Project
 
 	err := ctx.ShouldBindJSON(&reqBody)
 	if err != nil {
@@ -112,14 +94,7 @@ func createProject(ctx *gin.Context) {
 		return
 	}
 
-	project := models.Project{
-		Name:        reqBody.Name,
-		Description: reqBody.Description,
-		ClientID:    reqBody.ClientID,
-		Notes:       reqBody.Notes,
-	}
-
-	err = models.CreateProject(conn, project, ctx, auth.GetUser(ctx))
+	err = models.CreateProject(conn, reqBody, ctx, auth.GetUser(ctx))
 	if err != nil {
 		log.Println(err)
 		ctx.JSON(http.StatusInternalServerError, 
@@ -137,20 +112,10 @@ func createProject(ctx *gin.Context) {
 
 func updateProject(ctx *gin.Context) {
 	conn := db.GetPool()
-	var reqBody ProjectRB
-	idStr := ctx.Param("id")
-	pID, err := strconv.Atoi(idStr)
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest,
-			gin.H{
-				"message": "Failed to read param",
-				"error":   err.Error(),
-			},
-		)
-		return
-	}
+	var reqBody models.Project
+	pID := ctx.Param("id")
 
-	err = ctx.ShouldBindJSON(&reqBody)
+    err := ctx.ShouldBindJSON(&reqBody)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest,
 			gin.H{
@@ -173,15 +138,7 @@ func updateProject(ctx *gin.Context) {
 		return
 	}
 
-	project := models.Project{
-		ID:          pID,
-		Name:        reqBody.Name,
-		Description: reqBody.Description,
-		ClientID:    reqBody.ClientID,
-		Notes:       reqBody.Notes,
-	}
-
-	err = models.UpdateProject(conn, project, ctx, auth.GetUser(ctx))
+	err = models.UpdateProject(conn, reqBody, ctx, pID, auth.GetUser(ctx))
 	if err != nil {
 		log.Println(err)
 		ctx.JSON(http.StatusInternalServerError,
@@ -198,20 +155,9 @@ func updateProject(ctx *gin.Context) {
 
 func destroyProject(ctx *gin.Context) {
 	conn := db.GetPool()
-	idStr := ctx.Param("id")
-	pID, err := strconv.Atoi(idStr)
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest,
-			gin.H{
-				"message": "Failed to read param",
-				"error":   err.Error(),
-			},
-		)
+	pID := ctx.Param("id")
 
-		return
-	}
-
-	err = models.DestroyProject(conn, ctx, pID, auth.GetUser(ctx))
+    err := models.DestroyProject(conn, ctx, pID, auth.GetUser(ctx))
 	if err != nil {
 		log.Println(err)
 		ctx.JSON(http.StatusInternalServerError,

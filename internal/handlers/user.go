@@ -11,21 +11,13 @@ import (
 	"ledgerbolt.systems/internal/validator"
 )
 
-type UserRB struct {
-	FirstName   string `json:"FirstName" validate:"required,min=3,max=50"`
-	LastName    string `json:"LastName" validate:"required,min=3,max=50"`
-	CompanyName string `json:"CompanyName" validate:"min=3,max=100"`
-	Email       string `json:"Email" validate:"required,min=5,max=320"`
-	Phone       string `json:"Phone" validate:"required,min=5,max=50"`
-	Address     string `json:"Address" validate:"required,min=5,max=1000"`
-}
-
 func GetUserHandler(ctx *gin.Context) {
 	conn := db.GetPool()
 
 	user, err := models.GetUser(conn, ctx, auth.GetUser(ctx))
 	if err != nil {
 		log.Println(err)
+        log.Println("hit here")
 		ctx.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to get user from database", "error": err.Error()})
 		return
 	}
@@ -35,10 +27,11 @@ func GetUserHandler(ctx *gin.Context) {
 
 func UpdateUserHandler(ctx *gin.Context) {
 	conn := db.GetPool()
-	var reqBody UserRB
+	var reqBody models.User
 
 	err := ctx.ShouldBindJSON(&reqBody)
 	if err != nil {
+        log.Println("hit here")
 		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Failed to read request body", "error": err.Error()})
 		return
 	}
@@ -46,25 +39,18 @@ func UpdateUserHandler(ctx *gin.Context) {
     err = validator.Validate(&reqBody)
 	if err != nil {
 		log.Println(err)
+        log.Println("hit here 2")
 		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Failed to update user", "error": err.Error()})
         return
 	}
 
-	user := models.UserRequest{
-		FirstName:   reqBody.FirstName,
-		LastName:    reqBody.LastName,
-		CompanyName: reqBody.CompanyName,
-		Email: reqBody.Email,
-		Phone: reqBody.Phone,
-		Address: reqBody.Address,
-	}
-
-	err = models.UpdateUser(conn, user, ctx, auth.GetUser(ctx))
+	err = models.UpdateUser(conn, reqBody, ctx, auth.GetUser(ctx))
 	if err != nil {
 		log.Println(err)
+        log.Println("hit here 3")
 		ctx.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to update user", "error": err.Error()})
 		return
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{"message": "Successfully updated user", "error": err.Error()})
+	ctx.JSON(http.StatusOK, gin.H{"message": "Successfully updated user"})
 }

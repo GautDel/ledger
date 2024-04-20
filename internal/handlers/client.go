@@ -11,20 +11,6 @@ import (
 	"ledgerbolt.systems/internal/validator"
 )
 
-type ClientRB struct {
-	FirstName   string `json:"FirstName" validate:"required,min=3,max=50"`
-	LastName    string `json:"LastName" validate:"required,min=3,max=50"`
-	Description string `json:"Description" validate:"max=2000"`
-    Email       string `json:"Email" validate:"required,min=5,max=320"`
-	Phone       string `json:"Phone" validate:"required,min=5,max=50"`
-	Address     string `json:"Address" validate:"required,min=5,max=1000"`
-	Country     string `json:"Country" validate:"required,max=255"`
-}
-
-type SearchRB struct {
-    Search string `json:"Search" validate:"required,max=50"`
-}
-
 func getClientsHandler(ctx *gin.Context) {
 	conn := db.GetPool()
 
@@ -55,7 +41,7 @@ func getClientHandler(ctx *gin.Context) {
 func searchClientsHandler(ctx *gin.Context) {
 	conn := db.GetPool()
 
-	var reqBody SearchRB
+	var reqBody models.SearchClient
 	err := ctx.ShouldBindJSON(&reqBody)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Failed to read request body", "error": err.Error()})
@@ -81,7 +67,7 @@ func searchClientsHandler(ctx *gin.Context) {
 func newClientHandler(ctx *gin.Context) {
 	conn := db.GetPool()
 
-	var reqBody ClientRB
+	var reqBody models.Client
 	err := ctx.ShouldBindJSON(&reqBody)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Failed to read request body", "error": err.Error()})
@@ -95,17 +81,8 @@ func newClientHandler(ctx *gin.Context) {
         return
 	}
 
-	client := models.ClientRequest{
-		FirstName:   reqBody.FirstName,
-		LastName:    reqBody.LastName,
-		Description: reqBody.Description,
-		Email: reqBody.Email,
-		Phone: reqBody.Phone,
-		Address: reqBody.Address,
-		Country: reqBody.Country,
-	}
 
-	err = models.NewClient(conn, client, ctx, auth.GetUser(ctx))
+	err = models.NewClient(conn, reqBody, ctx, auth.GetUser(ctx))
 	if err != nil {
 		log.Println(err)
 		ctx.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to create client", "error": err.Error()})
@@ -119,7 +96,7 @@ func updateClientHandler(ctx *gin.Context) {
 	conn := db.GetPool()
 	clientID := ctx.Param("id")
 
-	var reqBody ClientRB
+	var reqBody models.Client
 	err := ctx.ShouldBindJSON(&reqBody)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Failed to read request body", "error": err.Error()})
@@ -133,17 +110,7 @@ func updateClientHandler(ctx *gin.Context) {
         return
 	}
 
-	client := models.ClientRequest{
-		FirstName:   reqBody.FirstName,
-		LastName:    reqBody.LastName,
-		Description: reqBody.Description,
-		Email: reqBody.Email,
-		Phone: reqBody.Phone,
-		Address: reqBody.Address,
-		Country: reqBody.Country,
-	}
-
-	err = models.UpdateClient(conn, client, ctx, clientID, auth.GetUser(ctx))
+	err = models.UpdateClient(conn, reqBody, ctx, clientID, auth.GetUser(ctx))
 	if err != nil {
 		log.Println(err)
 		ctx.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to update client", "error": err.Error()})

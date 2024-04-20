@@ -1,22 +1,22 @@
 package models
 
 import (
+	"errors"
+
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"ledgerbolt.systems/internal/queries"
 )
 
 type PaymentStatus struct {
-	ID     int
-	Status string
-	Color  string
+	ID int `json:"ID"`
+	Status string `json:"Status" validate:"required,min=3,max=50"`
+	Color  string `json:"Color" validate:"min=3,max=100"`
 }
-
 func GetPaymentStatus(conn *pgxpool.Pool, ctx *gin.Context) ([]PaymentStatus, error) {
 	var psSlice []PaymentStatus
-	query := `
-    SELECT * FROM payment_status`
 
-	rows, err := conn.Query(ctx, query)
+	rows, err := conn.Query(ctx, queries.GetPaymentStatus)
 	if err != nil {
 		return psSlice, err
 	}
@@ -45,10 +45,8 @@ func GetPaymentStatus(conn *pgxpool.Pool, ctx *gin.Context) ([]PaymentStatus, er
 
 func GetSinglePaymentStatus(conn *pgxpool.Pool, ctx *gin.Context, psID string) (PaymentStatus, error) {
 	var ps PaymentStatus
-	query := `
-    SELECT * FROM payment_status WHERE id = $1`
 
-	row := conn.QueryRow(ctx, query, psID)
+	row := conn.QueryRow(ctx, queries.GetSinglePaymentStatus, psID)
 
 	err := row.Scan(
 		&ps.ID,
@@ -63,13 +61,7 @@ func GetSinglePaymentStatus(conn *pgxpool.Pool, ctx *gin.Context, psID string) (
 }
 
 func CreatePaymentStatus(conn *pgxpool.Pool, ps PaymentStatus, ctx *gin.Context) error {
-	query := `
-    INSERT INTO payment_status (
-        status,
-        color
-    ) VALUES ($1, $2)`
-
-	_, err := conn.Exec(ctx, query, ps.Status, ps.Color)
+	_, err := conn.Exec(ctx, queries.CreatePaymentStatus, ps.Status, ps.Color)
 	if err != nil {
 		return err
 	}
@@ -78,15 +70,10 @@ func CreatePaymentStatus(conn *pgxpool.Pool, ps PaymentStatus, ctx *gin.Context)
 }
 
 func UpdatePaymentStatus(conn *pgxpool.Pool, ps PaymentStatus, ctx *gin.Context, psID string) error {
-	query := `
-    UPDATE payment_status SET
-    status = $1,
-    color = $2
-    WHERE id = $3`
-
-	_, err := conn.Exec(
+	
+	cmd, err := conn.Exec(
 		ctx,
-		query,
+		queries.UpdatePaymentStatus,
 		ps.Status,
 		ps.Color,
 		psID,
@@ -95,22 +82,27 @@ func UpdatePaymentStatus(conn *pgxpool.Pool, ps PaymentStatus, ctx *gin.Context,
 		return err
 	}
 
+    if cmd.RowsAffected() == 0 {
+        return errors.New("Payment status does not exist, invalid ID")
+    }
+
 	return nil
 }
 
 func DestroyPaymentStatus(conn *pgxpool.Pool, ctx *gin.Context, psID string) error {
-	query := `
-    DELETE FROM payment_status
-    WHERE id = $1`
 
-	_, err := conn.Exec(
+	cmd, err := conn.Exec(
 		ctx,
-		query,
+		queries.DestroyPaymentStatus,
 		psID,
 	)
 	if err != nil {
 		return err
 	}
+
+    if cmd.RowsAffected() == 0 {
+        return errors.New("Payment status does not exist, invalid ID")
+    }
 
 	return nil
 }

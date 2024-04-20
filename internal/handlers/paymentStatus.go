@@ -10,11 +10,6 @@ import (
 	"ledgerbolt.systems/internal/validator"
 )
 
-type PaymentStatusRB struct {
-	Status string `json:"Status" validate:"required,min=3,max=50"`
-	Color  string `json:"Color" validate:"min=3,max=100"`
-}
-
 func getPaymentStatus(ctx *gin.Context) {
 	conn := db.GetPool()
 
@@ -29,7 +24,6 @@ func getPaymentStatus(ctx *gin.Context) {
 
 func getSinglePaymentStatus(ctx *gin.Context) {
 	conn := db.GetPool()
-
 	psID := ctx.Param("id")
 
 	paymentStatus, err := models.GetSinglePaymentStatus(conn, ctx, psID)
@@ -43,7 +37,7 @@ func getSinglePaymentStatus(ctx *gin.Context) {
 
 func createPaymentStatus(ctx *gin.Context) {
 	conn := db.GetPool()
-	var reqBody PaymentStatusRB
+	var reqBody models.PaymentStatus
 	err := ctx.ShouldBindJSON(&reqBody)
 
 	if err != nil {
@@ -51,20 +45,14 @@ func createPaymentStatus(ctx *gin.Context) {
 		return
 	}
 
-    err = validator.Validate(&reqBody)
+	err = validator.Validate(&reqBody)
 	if err != nil {
 		log.Println(err)
 		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Failed to update payment status", "error": err.Error()})
-        return
+		return
 	}
 
-
-	paymentStatus := models.PaymentStatus{
-		Status: reqBody.Status,
-		Color:  reqBody.Color,
-	}
-
-	err = models.CreatePaymentStatus(conn, paymentStatus, ctx)
+	err = models.CreatePaymentStatus(conn, reqBody, ctx)
 	if err != nil {
 		log.Println(err)
 		ctx.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to create payment status", "error": err.Error()})
@@ -76,27 +64,22 @@ func createPaymentStatus(ctx *gin.Context) {
 
 func updatePaymentStatus(ctx *gin.Context) {
 	conn := db.GetPool()
-    psID := ctx.Param("id")
-	var reqBody PaymentStatusRB
+	psID := ctx.Param("id")
+	var reqBody models.PaymentStatus
 	err := ctx.ShouldBindJSON(&reqBody)
 	if err != nil {
 		log.Println(err)
 		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Failed to read request body", "error": err.Error()})
 	}
 
-    err = validator.Validate(&reqBody)
+	err = validator.Validate(&reqBody)
 	if err != nil {
 		log.Println(err)
 		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Failed to update payment status", "error": err.Error()})
-        return
+		return
 	}
 
-    paymentStatus := models.PaymentStatus{
-        Status: reqBody.Status,
-        Color: reqBody.Color,
-    }
-
-    err = models.UpdatePaymentStatus(conn, paymentStatus, ctx, psID)
+	err = models.UpdatePaymentStatus(conn, reqBody, ctx, psID)
 	if err != nil {
 		log.Println(err)
 		ctx.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to update payment status", "error": err.Error()})
@@ -107,15 +90,15 @@ func updatePaymentStatus(ctx *gin.Context) {
 }
 
 func destroyPaymentStatus(ctx *gin.Context) {
-    conn := db.GetPool()
-    psID := ctx.Param("id")
+	conn := db.GetPool()
+	psID := ctx.Param("id")
 
-    err := models.DestroyPaymentStatus(conn, ctx, psID) 
-    if err != nil {
-        log.Println(err)
+	err := models.DestroyPaymentStatus(conn, ctx, psID)
+	if err != nil {
+		log.Println(err)
 		ctx.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to remove payment status", "error": err.Error()})
-        return
-    }
+		return
+	}
 
 	ctx.JSON(http.StatusOK, gin.H{"message": "Payment status successfully removed!"})
 }

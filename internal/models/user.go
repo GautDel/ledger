@@ -1,49 +1,31 @@
 package models
 
 import (
+	"errors"
 	"log"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"ledgerbolt.systems/internal/queries"
 )
 
 type User struct {
-	FirstName   string
-	LastName    string
-	CompanyName string
-	Email       string
-	Phone       string
-	Address     string
-	CompanyNum  string
-	CreatedAt   time.Time
-	UpdatedAt   time.Time
-}
-
-type UserRequest struct {
-	FirstName   string
-	LastName    string
-	CompanyName string
-	Email       string
-	Phone       string
-	Address     string
-	CompanyNum  string
+	FirstName   string `json:"FirstName" validate:"required,min=3,max=50"`
+	LastName    string `json:"LastName" validate:"required,min=3,max=50"`
+	CompanyName string `json:"CompanyName" validate:"min=3,max=100"`
+	Email       string `json:"Email" validate:"required,min=5,max=320"`
+	Phone       string `json:"Phone" validate:"required,min=5,max=50"`
+	Address     string `json:"Address" validate:"required,min=5,max=1000"`
+	CompanyNum     string `json:"CompanyNum" validate:"required,min=5,max=1000"`
+	CreatedAt     time.Time `json:"CreatedAt"`
+	UpdatedAt     time.Time `json:"UpdatedAt"`
 }
 
 func GetUser(conn *pgxpool.Pool, ctx *gin.Context, userID string) (User, error) {
 	var user User
-	query := `SELECT 
-        first_name,
-        last_name,
-        company_name,
-        email,
-        phone,
-        address,
-        company_num
-        FROM users 
-        WHERE id = $1`
 
-	row := conn.QueryRow(ctx, query, userID)
+	row := conn.QueryRow(ctx, queries.GetUser, userID)
 	err := row.Scan(
 		&user.FirstName,
 		&user.LastName,
@@ -58,24 +40,15 @@ func GetUser(conn *pgxpool.Pool, ctx *gin.Context, userID string) (User, error) 
 		return user, err
 	}
 
+    log.Println(userID)
 	return user, nil
 }
 
-func UpdateUser(conn *pgxpool.Pool, user UserRequest, ctx *gin.Context, userID string) error {
-	query := `
-        UPDATE users SET
-        first_name = $1,
-        last_name = $2,
-        company_name = $3,
-        email = $4,
-        phone = $5,
-        address = $6,
-        company_num = $7
-        WHERE id = $7`
+func UpdateUser(conn *pgxpool.Pool, user User, ctx *gin.Context, userID string) error {
 
-	_, err := conn.Exec(
+	cmd, err := conn.Exec(
 		ctx,
-		query,
+		queries.UpdateUser,
 		user.FirstName,
 		user.LastName,
 		user.CompanyName,
@@ -89,6 +62,10 @@ func UpdateUser(conn *pgxpool.Pool, user UserRequest, ctx *gin.Context, userID s
 		log.Println(err)
 		return err
 	}
+
+    if cmd.RowsAffected() == 0 {
+        return errors.New("User doesn't exist, invalid ID")
+    }
 
 	return nil
 }

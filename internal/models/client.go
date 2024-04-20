@@ -1,6 +1,7 @@
 package models
 
 import (
+	"errors"
 	"log"
 	"time"
 
@@ -11,26 +12,20 @@ import (
 )
 
 type Client struct {
-	ID          string
-	FirstName   string
-	LastName    string
-	Description string
-	Email       string
-	Phone       string
-	Address     string
-	Country     string
-	CreatedAt   time.Time
-	UpdatedAt   time.Time
+	ID          int       `json:"ID"`
+	FirstName   string    `json:"FirstName" validate:"required,min=3,max=50"`
+	LastName    string    `json:"LastName" validate:"required,min=3,max=50"`
+	Description string    `json:"Description" validate:"max=2000"`
+	Email       string    `json:"Email" validate:"required,min=5,max=320"`
+	Phone       string    `json:"Phone" validate:"required,min=5,max=50"`
+	Address     string    `json:"Address" validate:"required,min=5,max=1000"`
+	Country     string    `json:"Country" validate:"required,max=255"`
+	CreatedAt   time.Time `json:"CreatedAt"`
+	UpdatedAt   time.Time `json:"UpdatedAt"`
 }
 
-type ClientRequest struct {
-	FirstName   string
-	LastName    string
-	Description string
-	Email       string
-	Phone       string
-	Address     string
-	Country     string
+type SearchClient struct {
+	Search string `json:"Search" validate:"required,max=50"`
 }
 
 func GetClients(conn *pgxpool.Pool, ctx *gin.Context, userID string) ([]Client, error) {
@@ -126,7 +121,7 @@ func SearchClients(conn *pgxpool.Pool, searchStr string, ctx *gin.Context, userI
 	return clients, nil
 }
 
-func NewClient(conn *pgxpool.Pool, client ClientRequest, ctx *gin.Context, userID string) error {
+func NewClient(conn *pgxpool.Pool, client Client, ctx *gin.Context, userID string) error {
 
 	_, err := conn.Exec(
 		ctx,
@@ -140,13 +135,16 @@ func NewClient(conn *pgxpool.Pool, client ClientRequest, ctx *gin.Context, userI
 		client.Country,
 		userID,
 	)
+	if err != nil {
+		return err
+	}
 
 	return err
 }
 
-func UpdateClient(conn *pgxpool.Pool, client ClientRequest, ctx *gin.Context, clientID string, userID string) error {
+func UpdateClient(conn *pgxpool.Pool, client Client, ctx *gin.Context, clientID string, userID string) error {
 
-	_, err := conn.Exec(
+	cmd, err := conn.Exec(
 		ctx,
 		queries.UpdateClient,
 		client.FirstName,
@@ -159,13 +157,23 @@ func UpdateClient(conn *pgxpool.Pool, client ClientRequest, ctx *gin.Context, cl
 		clientID,
 		userID,
 	)
+	if err != nil {
+		return err
+	}
 
-	return err
+	if cmd.RowsAffected() == 0 {
+		return errors.New("Client doesn't exist. Invalid ID")
+	}
+
+	return nil
 }
 
 func DestroyClient(conn *pgxpool.Pool, clientID string, ctx *gin.Context, userID string) error {
 
-	_, err := conn.Exec(ctx, queries.DestroyClient, clientID, userID)
+	cmd, err := conn.Exec(ctx, queries.DestroyClient, clientID, userID)
+	if cmd.RowsAffected() == 0 {
+		return errors.New("Client doesn't exist. Invalid ID")
+	}
 
 	return err
 }

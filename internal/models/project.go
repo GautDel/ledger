@@ -1,21 +1,23 @@
 package models
 
 import (
+	"errors"
 	"log"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"ledgerbolt.systems/internal/queries"
 )
 
 type Project struct {
-	ID          int
-	Name        string
-	Description string
-	ClientID    int
-	Notes       string
-	CreatedAt   time.Time
-	UpdatedAt   time.Time
+	ID          int       `json:"ID"`
+	Name        string    `json:"Name" validate:"required,min=3,max=50"`
+	Description string    `json:"Description" validate:"required,min=3,max=1000"`
+	ClientID    int       `json:"ClientID" validate:"required"`
+	Notes       string    `json:"Notes"`
+	CreatedAt   time.Time `json:"CreatedAt"`
+	UpdatedAt   time.Time `json:"UpdatedAt"`
 }
 
 func GetProjects(
@@ -25,19 +27,8 @@ func GetProjects(
 ) ([]Project, error) {
 
 	var projects []Project
-	query := `
-    SELECT 
-    id,
-    name,
-    description,
-    client_id,
-    notes,
-    created_at,
-    updated_at
-    FROM projects 
-    WHERE user_id = $1`
 
-	rows, err := conn.Query(ctx, query, userID)
+	rows, err := conn.Query(ctx, queries.GetProjects, userID)
 	if err != nil {
 		log.Println(err)
 		return projects, err
@@ -76,20 +67,8 @@ func GetProject(
 ) (Project, error) {
 
 	var p Project
-	query := `
-    SELECT 
-    id,
-    name,
-    description,
-    client_id,
-    notes,
-    created_at,
-    updated_at
-    FROM projects 
-    WHERE user_id = $1 
-    AND id = $2`
 
-	row := conn.QueryRow(ctx, query, userID, projectID)
+	row := conn.QueryRow(ctx, queries.GetProject, userID, projectID)
 
 	err := row.Scan(
 		&p.ID,
@@ -112,23 +91,11 @@ func GetProjectByClient(
 	conn *pgxpool.Pool,
 	ctx *gin.Context,
 	userID string,
-	clientID int,
+	clientID string,
 ) ([]Project, error) {
-    var projects []Project
-	query := `
-    SELECT 
-    id,
-    name,
-    description,
-    client_id,
-    notes,
-    created_at,
-    updated_at
-    FROM projects 
-    WHERE user_id = $1 
-    AND client_id = $2`
+	var projects []Project
 
-	rows, err := conn.Query(ctx, query, userID, clientID)
+	rows, err := conn.Query(ctx, queries.GetProjectsByClient, userID, clientID)
 	if err != nil {
 		log.Println(err)
 		return projects, err
@@ -166,17 +133,9 @@ func CreateProject(
 	userID string,
 ) error {
 
-	query := `
-    INSERT INTO projects(
-        name,
-        description,
-        user_id,
-        client_id,
-        notes) VALUES ($1,$2,$3,$4,$5)`
-
 	_, err := conn.Exec(
 		ctx,
-		query,
+		queries.CreateProject,
 		p.Name,
 		p.Description,
 		userID,
@@ -195,30 +154,27 @@ func UpdateProject(
 	conn *pgxpool.Pool,
 	p Project,
 	ctx *gin.Context,
+	pID string,
 	userID string,
 ) error {
 
-	query := `
-    UPDATE projects SET
-    name = $1,
-    description = $2,
-    client_id = $3,
-    notes = $4
-    WHERE id = $5 AND user_id = $6`
-
-	_, err := conn.Exec(
+	cmd, err := conn.Exec(
 		ctx,
-		query,
+		queries.UpdateProject,
 		p.Name,
 		p.Description,
 		p.ClientID,
 		p.Notes,
-        p.ID,
+		pID,
 		userID,
 	)
 	if err != nil {
 		log.Println(err)
 		return err
+	}
+
+	if cmd.RowsAffected() == 0 {
+		return errors.New("Project doesn't exist. Invalid ID")
 	}
 
 	return nil
@@ -227,18 +183,14 @@ func UpdateProject(
 func DestroyProject(
 	conn *pgxpool.Pool,
 	ctx *gin.Context,
-	pID int,
+	pID string,
 	userID string,
 ) error {
 
-	query := `
-    DELETE FROM projects 
-    WHERE id = $1 AND user_id = $2`
-
-	_, err := conn.Exec(
+	cmd, err := conn.Exec(
 		ctx,
-		query,
-        pID,
+		queries.DestroyProject,
+		pID,
 		userID,
 	)
 	if err != nil {
@@ -246,5 +198,8 @@ func DestroyProject(
 		return err
 	}
 
+	if cmd.RowsAffected() == 0 {
+		return errors.New("Project doesn't exist. Invalid ID")
+	}
 	return nil
 }
