@@ -10,5 +10,3 @@ func ParseTime(layout string, str time.Time) time.Time {
 
 	return t
 }
-
-

@@ -110,6 +110,7 @@ WHERE user_id = $1 AND id = $2`
 
 const CreateInvoiceItem = `
 INSERT INTO invoice_items (
+    id,
     invoice_id, 
     qty, 
     name, 
@@ -118,7 +119,7 @@ INSERT INTO invoice_items (
     hourly_price,
     total_price,
     user_id
-) VALUES ($1,$2,$3,$4,$5,$6,$7,$8)`
+) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)`
 
 const UpdateInvoiceItem = `
 UPDATE invoice_items SET
@@ -130,32 +131,31 @@ UPDATE invoice_items SET
     total_price = $6
 WHERE user_id = $7 AND invoice_id = $8` 
 
+const UpsertInvoiceItem = `
+INSERT INTO invoice_items (
+    id,
+    invoice_id,
+    qty,
+    name,
+    description,
+    unit_price,
+    hourly_price,
+    total_price,
+    user_id
+)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+ON CONFLICT (id)
+DO UPDATE 
+SET 
+    qty = excluded.qty, 
+    name = excluded.name, 
+    description = excluded.description, 
+    unit_price = excluded.unit_price, 
+    hourly_price = excluded.hourly_price, 
+    total_price = excluded.total_price
+WHERE excluded.user_id = $9`
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+const DestroyInvoiceItem = `
+DELETE FROM invoice_items
+WHERE user_id = $1 AND id = $2`
 

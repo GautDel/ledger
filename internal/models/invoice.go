@@ -5,19 +5,22 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"ledgerbolt.systems/internal/queries"
+	"ledgerbolt.systems/utils"
 )
 
 type InvoiceItem struct {
-	ID          string  `json:"ID"`
-	InvoiceID   string  `json:"InvoiceID"`
-	Qty         int     `json:"Qty" validate:"required"`
-	Name        string  `json:"Name" validate:"required,min=3,max=100"`
-	Description string  `json:"Description" validate:"required,min=5,max=1000"`
-	UnitPrice   float64 `json:"UnitPrice"`
-	HourlyPrice float64 `json:"HourlyPrice"`
-	TotalPrice  float64 `json:"TotalPrice" validate:"required"`
+	ID          uuid.UUID `json:"ID"`
+	InvoiceID   string    `json:"InvoiceID"`
+	Qty         int       `json:"Qty" validate:"required"`
+	Name        string    `json:"Name" validate:"required,min=3,max=100"`
+	Description string    `json:"Description" validate:"required,min=5,max=1000"`
+	UnitPrice   float64   `json:"UnitPrice"`
+	HourlyPrice float64   `json:"HourlyPrice"`
+	TotalPrice  float64   `json:"TotalPrice" validate:"required"`
+	Delete      bool      `json:"Delete" validate:"required"`
 }
 
 type Invoice struct {
@@ -217,9 +220,11 @@ func CreateInvoice(
 
 	// Insert invoice items
 	for _, item := range i.InvoiceItems {
+		uuid := uuid.New()
 		_, err := tx.Exec(
 			ctx,
 			queries.CreateInvoiceItem,
+			uuid,
 			invoiceID,
 			item.Qty,
 			item.Name,
@@ -282,12 +287,18 @@ func UpdateInvoice(
 		return err
 	}
 
-	// Update invoice items
+	// Upsert here
 	for _, item := range i.InvoiceItems {
-		log.Println(item.Qty)
+
+		if !utils.IsUUID(item.ID) {
+			uuid := utils.GenUUID()
+			item.ID = uuid
+		}
 		_, err := tx.Exec(
 			ctx,
-			queries.UpdateInvoiceItem,
+			queries.UpsertInvoiceItem,
+			item.ID,
+			iID,
 			item.Qty,
 			item.Name,
 			item.Description,
@@ -295,10 +306,21 @@ func UpdateInvoice(
 			item.HourlyPrice,
 			item.TotalPrice,
 			userID,
-			iID,
 		)
 		if err != nil {
 			return err
+		}
+
+		if item.Delete {
+			_, err := tx.Exec(
+				ctx,
+				queries.DestroyInvoiceItem,
+                userID,
+				item.ID,
+			)
+			if err != nil {
+				return err
+			}
 		}
 	}
 
@@ -328,4 +350,5 @@ func DestroyInvoice(
 	}
 
 	return nil
+
 }
