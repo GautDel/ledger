@@ -7,6 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"ledgerbolt.systems/internal/queries"
 )
 
 type Client struct {
@@ -35,21 +36,8 @@ type ClientRequest struct {
 func GetClients(conn *pgxpool.Pool, ctx *gin.Context, userID string) ([]Client, error) {
 	var clients []Client
 	var client Client
-	query := `SELECT 
-        id,
-        first_name,
-        last_name,
-        description,
-        email,
-        phone,
-        address,
-        country,
-        created_at,
-        updated_at
-        FROM clients 
-        WHERE user_id = $1`
 
-	rows, err := conn.Query(ctx, query, userID)
+	rows, err := conn.Query(ctx, queries.GetClients, userID)
 	if err != nil {
 		return clients, err
 	}
@@ -82,19 +70,8 @@ func GetClients(conn *pgxpool.Pool, ctx *gin.Context, userID string) ([]Client, 
 
 func GetClient(conn *pgxpool.Pool, clientID string, ctx *gin.Context, userID string) (Client, error) {
 	var client Client
-	query := `SELECT 
-        id,
-        first_name,
-        last_name,
-        description,
-        email,
-        phone,
-        address,
-        country
-        FROM clients 
-        WHERE id = $1
-        AND user_id = $2`
-	rows := conn.QueryRow(ctx, query, clientID, userID)
+
+	rows := conn.QueryRow(ctx, queries.GetClient, clientID, userID)
 
 	err := rows.Scan(
 		&client.ID,
@@ -117,23 +94,8 @@ func GetClient(conn *pgxpool.Pool, clientID string, ctx *gin.Context, userID str
 func SearchClients(conn *pgxpool.Pool, searchStr string, ctx *gin.Context, userID string) ([]Client, error) {
 	var clients []Client
 	var client Client
-	query := `
-        SELECT
-        id,
-        first_name,
-        last_name,
-        description,
-        email,
-        phone,
-        address,
-        country,
-        created_at,
-        updated_at
-        FROM clients 
-        WHERE first_name ILIKE '%' || $1 || '%'
-        OR last_name ILIKE '%' || $1 || '%'`
 
-	rows, err := conn.Query(ctx, query, searchStr)
+	rows, err := conn.Query(ctx, queries.SearchClients, searchStr)
 	if err != nil {
 		return clients, err
 	}
@@ -165,20 +127,10 @@ func SearchClients(conn *pgxpool.Pool, searchStr string, ctx *gin.Context, userI
 }
 
 func NewClient(conn *pgxpool.Pool, client ClientRequest, ctx *gin.Context, userID string) error {
-	query := `
-        INSERT INTO clients(
-            first_name,
-            last_name,
-            description,
-            email,
-            phone,
-            address,
-            country,
-            user_id
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`
+
 	_, err := conn.Exec(
 		ctx,
-		query,
+		queries.NewClient,
 		client.FirstName,
 		client.LastName,
 		client.Description,
@@ -193,20 +145,10 @@ func NewClient(conn *pgxpool.Pool, client ClientRequest, ctx *gin.Context, userI
 }
 
 func UpdateClient(conn *pgxpool.Pool, client ClientRequest, ctx *gin.Context, clientID string, userID string) error {
-	query := `
-        UPDATE clients SET 
-        first_name = $1,
-        last_name = $2,
-        description = $3
-        email = $4
-        phone = $5
-        address = $6
-        country = $7
-        WHERE id = $8 AND user_id = $9`
 
 	_, err := conn.Exec(
 		ctx,
-		query,
+		queries.UpdateClient,
 		client.FirstName,
 		client.LastName,
 		client.Description,
@@ -222,11 +164,8 @@ func UpdateClient(conn *pgxpool.Pool, client ClientRequest, ctx *gin.Context, cl
 }
 
 func DestroyClient(conn *pgxpool.Pool, clientID string, ctx *gin.Context, userID string) error {
-	query := `
-        DELETE FROM clients 
-        WHERE id = $1 AND user_id = $2`
 
-	_, err := conn.Exec(ctx, query, clientID, userID)
+	_, err := conn.Exec(ctx, queries.DestroyClient, clientID, userID)
 
 	return err
 }
