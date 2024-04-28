@@ -3,8 +3,6 @@ package models
 import (
 	"errors"
 	"log"
-	"net/http"
-	"os"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -29,27 +27,6 @@ type EncBank struct {
 	AccountName  []byte
 	BankName     []byte
 	BankLocation []byte
-}
-
-func encryptField(ctx *gin.Context, field string) []byte {
-	encrypted, err := encrypt.Encrypt(field, os.Getenv("ENC_KEY"))
-	if err != nil {
-		log.Println(err)
-		ctx.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to encrypt data", "error": err.Error()})
-	}
-
-	return encrypted
-}
-
-func decryptField(ctx *gin.Context, field []byte) string {
-
-	decrypted, err := encrypt.Decrypt(field, os.Getenv("ENC_KEY"))
-	if err != nil {
-		log.Println(err)
-		ctx.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to decrypt data", "error": err.Error()})
-	}
-
-	return string(decrypted)
 }
 
 func GetBanks(conn *pgxpool.Pool, ctx *gin.Context, userID string) ([]Bank, error) {
@@ -81,11 +58,11 @@ func GetBanks(conn *pgxpool.Pool, ctx *gin.Context, userID string) ([]Bank, erro
 	for _, encBank := range encBanks {
 		var bank Bank
 		bank.ID = encBank.ID
-		bank.BIC = decryptField(ctx, encBank.BIC)
-		bank.IBAN = decryptField(ctx, encBank.IBAN)
-		bank.AccountName = decryptField(ctx, encBank.AccountName)
-		bank.BankName = decryptField(ctx, encBank.BankName)
-		bank.BankLocation = decryptField(ctx, encBank.BankLocation)
+		bank.BIC = encrypt.DecryptField(ctx, encBank.BIC)
+		bank.IBAN = encrypt.DecryptField(ctx, encBank.IBAN)
+		bank.AccountName = encrypt.DecryptField(ctx, encBank.AccountName)
+		bank.BankName = encrypt.DecryptField(ctx, encBank.BankName)
+		bank.BankLocation = encrypt.DecryptField(ctx, encBank.BankLocation)
 		banks = append(banks, bank)
 	}
 
@@ -112,11 +89,11 @@ func GetBank(conn *pgxpool.Pool, ctx *gin.Context, userID string, bankID string)
 	}
 
 	bank.ID = encBank.ID
-	bank.BIC = decryptField(ctx, encBank.BIC)
-	bank.IBAN = decryptField(ctx, encBank.IBAN)
-	bank.AccountName = decryptField(ctx, encBank.AccountName)
-	bank.BankName = decryptField(ctx, encBank.BankName)
-	bank.BankLocation = decryptField(ctx, encBank.BankLocation)
+	bank.BIC = encrypt.DecryptField(ctx, encBank.BIC)
+	bank.IBAN = encrypt.DecryptField(ctx, encBank.IBAN)
+	bank.AccountName = encrypt.DecryptField(ctx, encBank.AccountName)
+	bank.BankName = encrypt.DecryptField(ctx, encBank.BankName)
+	bank.BankLocation = encrypt.DecryptField(ctx, encBank.BankLocation)
 
 	return bank, err
 }
@@ -125,11 +102,11 @@ func CreateBank(conn *pgxpool.Pool, ctx *gin.Context, bank *Bank, userID string)
 	var encBank EncBank
 
 	uuid := uuid.New()
-	encBank.BIC = encryptField(ctx, bank.BIC)
-	encBank.IBAN = encryptField(ctx, bank.IBAN)
-	encBank.AccountName = encryptField(ctx, bank.AccountName)
-	encBank.BankName = encryptField(ctx, bank.BankName)
-	encBank.BankLocation = encryptField(ctx, bank.BankLocation)
+	encBank.BIC = encrypt.EncryptField(ctx, bank.BIC)
+	encBank.IBAN = encrypt.EncryptField(ctx, bank.IBAN)
+	encBank.AccountName = encrypt.EncryptField(ctx, bank.AccountName)
+	encBank.BankName = encrypt.EncryptField(ctx, bank.BankName)
+	encBank.BankLocation = encrypt.EncryptField(ctx, bank.BankLocation)
 
 	_, err := conn.Exec(
 		ctx,
@@ -159,11 +136,11 @@ func UpdateBank(
 
 	var encBank EncBank
 
-	encBank.BIC = encryptField(ctx, bank.BIC)
-	encBank.IBAN = encryptField(ctx, bank.IBAN)
-	encBank.AccountName = encryptField(ctx, bank.AccountName)
-	encBank.BankName = encryptField(ctx, bank.BankName)
-	encBank.BankLocation = encryptField(ctx, bank.BankLocation)
+	encBank.BIC = encrypt.EncryptField(ctx, bank.BIC)
+	encBank.IBAN = encrypt.EncryptField(ctx, bank.IBAN)
+	encBank.AccountName = encrypt.EncryptField(ctx, bank.AccountName)
+	encBank.BankName = encrypt.EncryptField(ctx, bank.BankName)
+	encBank.BankLocation = encrypt.EncryptField(ctx, bank.BankLocation)
 
 	cmd, err := conn.Exec(
 		ctx,

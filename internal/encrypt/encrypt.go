@@ -5,6 +5,11 @@ import (
 	"crypto/cipher"
 	"crypto/rand"
 	"io"
+	"log"
+	"net/http"
+	"os"
+
+	"github.com/gin-gonic/gin"
 )
 
 func Encrypt(data string, envKey string) ([]byte, error){
@@ -59,3 +64,23 @@ func Decrypt(encrypted []byte, envKey string) ([]byte, error) {
 	return decrypted, nil
 }
 
+func EncryptField(ctx *gin.Context, field string) []byte {
+	encrypted, err := Encrypt(field, os.Getenv("ENC_KEY"))
+	if err != nil {
+		log.Println(err)
+		ctx.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to encrypt data", "error": err.Error()})
+	}
+
+	return encrypted
+}
+
+func DecryptField(ctx *gin.Context, field []byte) string {
+
+	decrypted, err := Decrypt(field, os.Getenv("ENC_KEY"))
+	if err != nil {
+		log.Println(err)
+		ctx.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to decrypt data", "error": err.Error()})
+	}
+
+	return string(decrypted)
+}
