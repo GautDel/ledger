@@ -17,8 +17,11 @@ SELECT
    invoices.client_phone,
    invoices.client_email,
    invoices.tax_percent,
+   invoices.client_id,
+   invoices.project_id,
    invoices.created_at,
    invoices.updated_at,
+   invoices.status,
    invoice_items.id,
    invoice_items.invoice_id,
    invoice_items.qty,
@@ -48,8 +51,11 @@ SELECT
    invoices.client_phone,
    invoices.client_email,
    invoices.tax_percent,
+   invoices.client_id,
+   invoices.project_id,
    invoices.created_at,
    invoices.updated_at,
+   invoices.status,
    invoice_items.id,
    invoice_items.invoice_id,
    invoice_items.qty,
@@ -61,7 +67,6 @@ SELECT
 FROM invoices
 LEFT JOIN invoice_items ON invoices.id = invoice_items.invoice_id
 WHERE invoices.user_id = $1 AND invoices.id = $2 AND invoice_items.id IS NOT NULL`
-
 
 const CreateInvoice = `
 INSERT INTO invoices(
@@ -81,8 +86,9 @@ INSERT INTO invoices(
     tax_percent,
     user_id,
     client_id,
-    project_id
-) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17)
+    project_id,
+    status
+) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18)
 RETURNING id`
 
 const UpdateInvoice = `
@@ -101,8 +107,9 @@ UPDATE invoices SET
     client_email = $12,
     tax_percent = $13,
     client_id = $14,
-    project_id = $15
-WHERE user_id = $16 AND id = $17`
+    project_id = $15,
+    status = $16
+WHERE user_id = $17 AND id = $18`
 
 const DestroyInvoice = `
 DELETE FROM invoices
@@ -129,7 +136,7 @@ UPDATE invoice_items SET
     unit_price = $4,
     hourly_price = $5,
     total_price = $6
-WHERE user_id = $7 AND invoice_id = $8` 
+WHERE user_id = $7 AND invoice_id = $8`
 
 const UpsertInvoiceItem = `
 INSERT INTO invoice_items (
@@ -159,3 +166,15 @@ const DestroyInvoiceItem = `
 DELETE FROM invoice_items
 WHERE user_id = $1 AND id = $2`
 
+const GetInvoiceID = `
+SELECT id FROM invoice_ids 
+WHERE invoice_id = $1`
+
+const CreateInvoiceID = `
+INSERT INTO invoice_ids (
+    id,
+    invoice_id
+) VALUES ($1, $2)`
+
+const CountInvoiceIDs = `
+SELECT COUNT(*) FROM invoice_ids`

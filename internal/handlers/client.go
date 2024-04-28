@@ -48,11 +48,11 @@ func searchClientsHandler(ctx *gin.Context) {
 		return
 	}
 
-    err = validator.Validate(&reqBody)
+	err = validator.Validate(&reqBody)
 	if err != nil {
 		log.Println(err)
 		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Failed to find client", "error": err.Error()})
-        return
+		return
 	}
 
 	clients, err := models.SearchClients(conn, reqBody.Search, ctx, auth.GetUser(ctx))
@@ -74,13 +74,12 @@ func newClientHandler(ctx *gin.Context) {
 		return
 	}
 
-    err = validator.Validate(&reqBody)
+	err = validator.Validate(&reqBody)
 	if err != nil {
 		log.Println(err)
 		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Failed to create client", "error": err.Error()})
-        return
+		return
 	}
-
 
 	err = models.NewClient(conn, reqBody, ctx, auth.GetUser(ctx))
 	if err != nil {
@@ -103,11 +102,11 @@ func updateClientHandler(ctx *gin.Context) {
 		return
 	}
 
-    err = validator.Validate(&reqBody)
+	err = validator.Validate(&reqBody)
 	if err != nil {
 		log.Println(err)
 		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Failed to update client", "error": err.Error()})
-        return
+		return
 	}
 
 	err = models.UpdateClient(conn, reqBody, ctx, clientID, auth.GetUser(ctx))
@@ -127,7 +126,7 @@ func destroyClientHandler(ctx *gin.Context) {
 	err := models.DestroyClient(conn, clientID, ctx, auth.GetUser(ctx))
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"message": "Couldn't delete client", "error": err.Error()})
-        return
+		return
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{"message": "Successfully removed client!"})

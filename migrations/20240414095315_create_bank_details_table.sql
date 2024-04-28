@@ -1,7 +1,7 @@
 -- +goose Up
 -- +goose StatementBegin
 CREATE TABLE bank_details(
-    id SERIAL PRIMARY KEY,
+    id UUID PRIMARY KEY,
     bic BYTEA NOT NULL,
     iban BYTEA NOT NULL,
     account_name BYTEA NOT NULL,

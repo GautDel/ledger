@@ -1,6 +1,7 @@
 package models
 
 import (
+	"errors"
 	"log"
 	"time"
 
@@ -43,6 +44,7 @@ type Invoice struct {
 	ProjectID     int           `json:"ProjectID" validate:"required"`
 	CreatedAt     time.Time     `json:"CreatedAt"`
 	UpdatedAt     time.Time     `json:"UpdatedAt"`
+	Status        string        `json:"Status" validate:"required,min=3,max=50"`
 	InvoiceItems  []InvoiceItem `json:"InvoiceItems" validate:"required"`
 }
 
@@ -80,8 +82,11 @@ func GetInvoices(
 			&i.ClientPhone,
 			&i.ClientEmail,
 			&i.TaxPercent,
+			&i.ClientID,
+			&i.ProjectID,
 			&i.CreatedAt,
 			&i.UpdatedAt,
+			&i.Status,
 			&item.ID,
 			&item.InvoiceID,
 			&item.Qty,
@@ -145,8 +150,11 @@ func GetInvoice(
 			&i.ClientPhone,
 			&i.ClientEmail,
 			&i.TaxPercent,
+			&i.ClientID,
+			&i.ProjectID,
 			&i.CreatedAt,
 			&i.UpdatedAt,
+			&i.Status,
 			&item.ID,
 			&item.InvoiceID,
 			&item.Qty,
@@ -190,12 +198,19 @@ func CreateInvoice(
 	defer tx.Rollback(ctx)
 
 	var invoiceID string
-	testInvID := "20240408"
+	var count int
+
+	err = tx.QueryRow(ctx, queries.CountInvoiceIDs).Scan(&count)
+	if err != nil {
+		return err
+	}
+
+	invID := utils.GenInvoiceID(count)
 
 	err = tx.QueryRow(
 		ctx,
 		queries.CreateInvoice,
-		testInvID,
+		invID,
 		i.InvoiceDate,
 		i.CompName,
 		i.CompAddress,
@@ -212,13 +227,24 @@ func CreateInvoice(
 		userID,
 		i.ClientID,
 		i.ProjectID,
+        i.Status,
 	).Scan(&invoiceID)
 
 	if err != nil {
 		return err
 	}
 
-	// Insert invoice items
+	_, err = tx.Exec(
+		ctx,
+		queries.CreateInvoiceID,
+		invID,
+		invoiceID,
+	)
+
+	if err != nil {
+		return err
+	}
+
 	for _, item := range i.InvoiceItems {
 		uuid := uuid.New()
 		_, err := tx.Exec(
@@ -261,7 +287,8 @@ func UpdateInvoice(
 	}
 
 	defer tx.Rollback(ctx)
-	_, err = tx.Exec(
+
+	cmd, execErr := tx.Exec(
 		ctx,
 		queries.UpdateInvoice,
 		i.InvoiceDate,
@@ -279,22 +306,25 @@ func UpdateInvoice(
 		i.TaxPercent,
 		i.ClientID,
 		i.ProjectID,
+        i.Status,
 		userID,
 		iID,
 	)
 
-	if err != nil {
-		return err
+	if execErr != nil {
+		return execErr
+	}
+	if cmd.RowsAffected() == 0 {
+		return errors.New("Invoice doesn't exist. Invalid ID")
 	}
 
-	// Upsert here
 	for _, item := range i.InvoiceItems {
 
 		if !utils.IsUUID(item.ID) {
 			uuid := utils.GenUUID()
 			item.ID = uuid
 		}
-		_, err := tx.Exec(
+		cmd, err := tx.Exec(
 			ctx,
 			queries.UpsertInvoiceItem,
 			item.ID,
@@ -311,15 +341,22 @@ func UpdateInvoice(
 			return err
 		}
 
+		if cmd.RowsAffected() == 0 {
+			return errors.New("Invoice Item doesn't exist. Invalid ID")
+		}
+
 		if item.Delete {
-			_, err := tx.Exec(
+			cmd, err := tx.Exec(
 				ctx,
 				queries.DestroyInvoiceItem,
-                userID,
+				userID,
 				item.ID,
 			)
 			if err != nil {
 				return err
+			}
+			if cmd.RowsAffected() == 0 {
+				return errors.New("Invoice Item doesn't exist. Invalid ID")
 			}
 		}
 	}
@@ -338,7 +375,8 @@ func DestroyInvoice(
 	iID string,
 	userID string,
 ) error {
-	_, err := conn.Exec(
+
+	cmd, err := conn.Exec(
 		ctx,
 		queries.DestroyInvoice,
 		userID,
@@ -349,6 +387,9 @@ func DestroyInvoice(
 		return err
 	}
 
-	return nil
+	if cmd.RowsAffected() == 0 {
+		return errors.New("Invoice doesn't exist. Invalid ID")
+	}
 
+	return nil
 }
