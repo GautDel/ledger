@@ -84,5 +84,14 @@ func New(auth *auth.Authenticator) *gin.Engine {
         bankRouter.GET("/:id", getBank)
 	}
 
+	serviceRouter := router.Group("/services", middleware.IsAuthenticated)
+	{
+        serviceRouter.GET("/", getServices)
+        serviceRouter.POST("/create", createService)
+        serviceRouter.PUT("/update/:id", updateService)
+        serviceRouter.DELETE("/remove/:id", destroyService)
+        serviceRouter.GET("/:id", getService)
+	}
+
 	return router
 }
