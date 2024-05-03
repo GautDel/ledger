@@ -61,7 +61,6 @@ func renderBoxHeader(s string, x float64, w float64) {
 		"M",
 		false,
 	)
-
 }
 
 func renderBox(
@@ -103,6 +102,7 @@ func renderCell(
 	item string,
 	color rgb,
 	a string,
+	nextLn bool,
 ) (float64, float64) {
 
 	page.SetXY(x, y)
@@ -120,6 +120,10 @@ func renderCell(
 		0,
 		"",
 	)
+
+    if nextLn {
+        page.Ln(-1)
+    }
 
 	return checkY(prevY, page.GetY()), page.GetX()
 }
@@ -140,16 +144,16 @@ func renderHeaderItem(w float64, s, a string, size float64) {
 	)
 }
 
-func renderItemsHeader(x, y, prevY float64, color rgb) float64 {
+func renderItemsHeader(x, y, prevY float64, color rgb, items []string) float64 {
 
 	page.SetXY(x, y)
 	page.SetTextColor(color.red, color.green, color.blue)
 
-	renderHeaderItem(bw.w7_12, "Item Details", "L", ts.md)
-	renderHeaderItem(bw.w1_12, "Qty/Hrs", "C", ts.md)
-	renderHeaderItem(bw.w1_12, "€/hour", "C", ts.md)
-	renderHeaderItem(bw.w1_12, "€/unit", "C", ts.md)
-	renderHeaderItem(bw.w2_12, "Total", "R", ts.md)
+	renderHeaderItem(bw.w7_12, items[0], "L", ts.md)
+	renderHeaderItem(bw.w1_12, items[1], "C", ts.md)
+	renderHeaderItem(bw.w1_12, items[2], "C", ts.md)
+	renderHeaderItem(bw.w1_12, items[3], "C", ts.md)
+	renderHeaderItem(bw.w2_12, items[4], "R", ts.md)
 
 	page.Ln(-1)
 

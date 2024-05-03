@@ -20,6 +20,45 @@ var pp = pageParams{
 	h2: "FACTURE",
 }
 
+type defaultText struct {
+	h1            string
+	h2            string
+	companyHeader string
+	clientHeader  string
+	invoiceHeader string
+	dateHeader    string
+	itemsHeader   []string
+	total         string
+	tax           string
+	message       string
+}
+
+var dtfr = defaultText{
+	h1:            "Amagine Media",
+	h2:            "FACTURE",
+	companyHeader: "Identification De l'Entrepreneur",
+	clientHeader:  "Identification Du Client",
+	invoiceHeader: "N⁰ Facture ",
+	dateHeader:    "Date: ",
+	itemsHeader:   []string{"Désignation Des Prestations", "Qty/Hrs", "€/Heure", "€/Unité", "Total"},
+	total:         "Total: €",
+	tax:           "TVA non applicable, art. 293 B du CGI",
+	message:       "Merci d'avance!",
+}
+
+var dten = defaultText{
+	h1:            "Amagine Media",
+	h2:            "INVOICE",
+	companyHeader: "Company Details",
+	clientHeader:  "Client Details",
+	invoiceHeader: "Invoice No. ",
+	dateHeader:    "Date: ",
+	itemsHeader:   []string{"Désignation Des Prestations", "Qty/Hrs", "€/Heure", "€/Unité", "Total"},
+	total:         "Total: €",
+	tax:           "TVA not applicable, art. 293 B du CGI",
+	message:       "Thank you in advance!",
+}
+
 type boxWidth struct {
 	w1_12  float64
 	w2_12  float64
@@ -36,7 +75,7 @@ type boxWidth struct {
 }
 
 var bw = boxWidth{
-    // page width - (page margin * 2 (for either side)) / fractional unit * column num)
+	// page width - (page margin * 2 (for either side)) / fractional unit * column num)
 	w1_12:  ((pp.w - (pp.m * 2)) / 12),
 	w2_12:  ((pp.w - (pp.m * 2)) / 12) * 2,
 	w3_12:  ((pp.w - (pp.m * 2)) / 12) * 3,
@@ -62,13 +101,13 @@ type textSizing struct {
 }
 
 var ts = textSizing{
-    xs: 8,
-    sm: 10,
-    base: 12,
-    md: 16,
-    lg: 24,
-    xl: 32,
-    xxl: 46,
+	xs:   8,
+	sm:   10,
+	base: 12,
+	md:   16,
+	lg:   24,
+	xl:   32,
+	xxl:  46,
 }
 
 type marginSizing struct {
@@ -78,17 +117,21 @@ type marginSizing struct {
 	lg   float64
 	xl   float64
 	xxl  float64
-	xxxl  float64
+	xxxl float64
 }
 
 var ms = marginSizing{
-    xs: 2,
-    sm: 4,
-    md: 6,
-    lg: 10,
-    xl: 12,
-    xxl: 14,
-    xxxl: 32,
+	xs:   2,
+	sm:   4,
+	md:   6,
+	lg:   10,
+	xl:   12,
+	xxl:  14,
+	xxxl: 32,
+}
+
+func (ms *marginSizing) botMargin(currY *float64, m float64) {
+	*currY += m
 }
 
 type alignX struct {
