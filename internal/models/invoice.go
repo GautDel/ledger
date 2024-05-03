@@ -3,6 +3,7 @@ package models
 import (
 	"errors"
 	"log"
+	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -46,6 +47,17 @@ type Invoice struct {
 	UpdatedAt     time.Time     `json:"UpdatedAt"`
 	Status        string        `json:"Status" validate:"required,min=3,max=50"`
 	InvoiceItems  []InvoiceItem `json:"InvoiceItems" validate:"required"`
+}
+
+func (i InvoiceItem) Fields() []string {
+    return []string{
+        i.Name, 
+        i.Description, 
+        strconv.Itoa(i.Qty),
+        strconv.FormatFloat(i.UnitPrice, 'f', -1, 64),
+        strconv.FormatFloat(i.HourlyPrice, 'f', -1, 64),
+        strconv.FormatFloat(i.TotalPrice, 'f', -1, 64),
+    }
 }
 
 func GetInvoices(
