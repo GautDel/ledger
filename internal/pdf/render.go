@@ -36,7 +36,7 @@ func renderPageHeader(
 		tr(val),
 		"",
 		0,
-		"L",
+		"R",
 		false,
 		0,
 		"",

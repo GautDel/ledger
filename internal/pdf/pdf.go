@@ -21,6 +21,17 @@ func loadData(ctx *gin.Context, iID string) (models.Invoice, error) {
 	return invoice[0], nil
 }
 
+func loadBank(ctx *gin.Context, bankID string) (models.Bank, error) {
+	conn := db.GetPool()
+
+	bank, err := models.GetBank(conn, ctx, auth.GetUser(ctx), bankID)
+	if err != nil {
+		return bank, err
+	}
+
+	return bank, nil
+}
+
 func initParams() {
 	page.AddPage()
 	page.SetFont("Helvetica", "", ts.base)
@@ -28,7 +39,7 @@ func initParams() {
 
 }
 
-func New(ctx *gin.Context, iID string) {
+func New(ctx *gin.Context, iID string, bankID string) {
 
 	data, err := loadData(ctx, iID)
 	if err != nil {
@@ -36,9 +47,17 @@ func New(ctx *gin.Context, iID string) {
 		return
 	}
 
-    // Create french page
-    newFr(data)
+	bank, err := loadBank(ctx, bankID)
+	if err != nil {
+		log.Println(err)
+		return
+	}
 
+	// Create French page
+	newFr(data, bank)
+
+	// Create English page
+	newEn(data, bank)
 
 	// Create file
 	err = page.OutputFileAndClose(data.InvoiceID + ".pdf")

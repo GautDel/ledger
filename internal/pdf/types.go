@@ -7,17 +7,15 @@ import (
 var page *fpdf.Fpdf = fpdf.New("P", "mm", "A4", "") // 210mm x 297mm
 
 type pageParams struct {
-	w  float64
-	h  float64
-	m  float64
-	h2 string
+	w float64
+	h float64
+	m float64
 }
 
 var pp = pageParams{
-	w:  210.00,
-	h:  297.00,
-	m:  10.00,
-	h2: "FACTURE",
+	w: 210.00,
+	h: 297.00,
+	m: 10.00,
 }
 
 type defaultText struct {
@@ -25,6 +23,11 @@ type defaultText struct {
 	h2            string
 	companyHeader string
 	clientHeader  string
+	paymentHeader string
+	bic           string
+	iban          string
+	bank          string
+	accName       string
 	invoiceHeader string
 	dateHeader    string
 	itemsHeader   []string
@@ -38,7 +41,12 @@ var dtfr = defaultText{
 	h2:            "FACTURE",
 	companyHeader: "Identification De l'Entrepreneur",
 	clientHeader:  "Identification Du Client",
-	invoiceHeader: "N⁰ Facture ",
+	paymentHeader: "Détails De Paiement",
+	bic:           "BIC: ",
+	iban:          "IBAN: ",
+	bank:          "Banque: ",
+	accName:       "Titulaire Du Compte: ",
+	invoiceHeader: "Numéro Facture:",
 	dateHeader:    "Date: ",
 	itemsHeader:   []string{"Désignation Des Prestations", "Qty/Hrs", "€/Heure", "€/Unité", "Total"},
 	total:         "Total: €",
@@ -49,11 +57,16 @@ var dtfr = defaultText{
 var dten = defaultText{
 	h1:            "Amagine Media",
 	h2:            "INVOICE",
-	companyHeader: "Company Details",
+	companyHeader: "Contractor Details",
 	clientHeader:  "Client Details",
+	paymentHeader: "Payment Details",
+	bic:           "BIC: ",
+	iban:          "IBAN: ",
+	bank:          "Bank: ",
+    accName:       "Account Holder: ",
 	invoiceHeader: "Invoice No. ",
 	dateHeader:    "Date: ",
-	itemsHeader:   []string{"Désignation Des Prestations", "Qty/Hrs", "€/Heure", "€/Unité", "Total"},
+	itemsHeader:   []string{"Item Details", "Qty/Hrs", "€/hour", "€/Unit", "Total"},
 	total:         "Total: €",
 	tax:           "TVA not applicable, art. 293 B du CGI",
 	message:       "Thank you in advance!",

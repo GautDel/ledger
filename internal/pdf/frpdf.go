@@ -6,7 +6,7 @@ import (
 	"ledgerbolt.systems/internal/models"
 )
 
-func newFr(data models.Invoice) {
+func newFr(data models.Invoice, bank models.Bank) {
 	initParams()
 
 	var currY, currX float64
@@ -19,7 +19,7 @@ func newFr(data models.Invoice) {
 	// Render "Facture"
 	page.SetFont("Helvetica", "B", ts.xxl)
 	currY = renderPageHeader(
-		ax.getEnd(page.GetStringWidth(pp.h2)),
+		ax.getEnd(page.GetStringWidth(dtfr.h2)),
 		pp.m,
 		currY,
 		dtfr.h2,
@@ -54,11 +54,75 @@ func newFr(data models.Invoice) {
 		dtfr.clientHeader,
 		[]string{
 			data.ClientName,
-			data.ClientEmail,
 			data.ClientAddress,
 			data.ClientPhone,
+			data.ClientEmail,
 		},
 		neutral950,
+	)
+
+	ms.botMargin(y, ms.sm)
+	page.SetFont("Helvetica", "B", ts.base)
+	currY, _ = renderCell(
+		ax.start,
+		currY,
+		page.GetStringWidth(dtfr.paymentHeader),
+		currY,
+		ts.sm,
+		dtfr.paymentHeader,
+		neutral950,
+		"L",
+		true,
+	)
+    
+	page.SetFont("Helvetica", "", ts.sm)
+	currY, _ = renderCell(
+		ax.start,
+		currY,
+		page.GetStringWidth(dtfr.bic+bank.BIC),
+		currY,
+		ts.sm,
+		dtfr.bic+bank.BIC,
+		neutral950,
+		"L",
+		true,
+	)
+
+
+	currY, _ = renderCell(
+		ax.start,
+		currY,
+		page.GetStringWidth(dtfr.iban+bank.IBAN),
+		currY,
+		ts.sm,
+		dtfr.iban+bank.IBAN,
+		neutral950,
+		"L",
+		true,
+	)
+
+	currY, _ = renderCell(
+		ax.start,
+		currY,
+		page.GetStringWidth(dtfr.bank+bank.BankName),
+		currY,
+		ts.sm,
+		dtfr.bank+bank.BankName,
+		neutral950,
+		"L",
+		true,
+	)
+
+	currY, _ = renderCell(
+		ax.start,
+		currY,
+		page.GetStringWidth(dtfr.accName+bank.AccountName),
+		currY,
+		ts.sm,
+		dtfr.accName+bank.AccountName,
+		neutral950,
+		"L",
+		true,
 	)
 
 	ms.botMargin(y, ms.md)
@@ -69,7 +133,7 @@ func newFr(data models.Invoice) {
 		currY,
 		page.GetStringWidth(dtfr.invoiceHeader),
 		currY,
-		ts.sm,
+		ts.base,
 		dtfr.invoiceHeader,
 		neutral950,
 		"L",
@@ -77,20 +141,18 @@ func newFr(data models.Invoice) {
 	)
 
 	currY, _ = renderCell(
-		currX,
+		currX - 2,
 		currY,
 		page.GetStringWidth(data.InvoiceID),
 		currY,
-		ts.sm,
+		ts.base,
 		data.InvoiceID,
 		blue500,
 		"L",
 		true,
 	)
 
-	ms.botMargin(y, ms.sm)
-
-	page.SetFont("Helvetica", "B", ts.sm)
+	page.SetFont("Helvetica", "B", ts.base)
 	currY, currX = renderCell(
 		ax.start,
 		currY,
