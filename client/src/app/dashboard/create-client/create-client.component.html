@@ -1,0 +1,91 @@
+<ng-container *ngIf="toggleCard">
+  <form [formGroup]="clientForm" (ngSubmit)="onSubmit()"
+    class="lg:sticky lg:top-4 flex flex-col gap-4 p-4 lg:border lg:rounded lg:border-neutral-300 absolute bottom-0 left-0 w-full h-full overflow-scroll bg-white lg:h-fit lg:min-w-96">
+
+    <button [ngClass]="{'bg-red-500 hover:bg-red-600': toggleCard}"
+      class="lg:hidden absolute top-4 right-4 bg-blue-600 rounded p-3 hover:bg-blue-700 transition ease-in duration-150"
+      (touchstart)="toggleHandler()" (click)="toggleHandler()">
+      <svg [ngClass]="{'rotate-45': toggleCard}" class="w-4 stroke-white" viewBox="0 0 362 361" fill="none"
+        xmlns="http://www.w3.org/2000/svg">
+        <path d="M331.5 180.5L30.5 180.5" stroke-width="80" stroke-linecap="round" />
+        <path d="M181 30L181 331" stroke-width="80" stroke-linecap="round" />
+      </svg>
+    </button>
+
+    <p class="text-blue-600 font-semibold text-3xl text-center pb-2">Create Client</p>
+
+    <div class="flex flex-col gap-0.5">
+      <label class="font-semibold text-neutral-600 mb-1">First Name <span
+          class="text-red-600 font-bold">*</span></label>
+      <input type="text" placeholder="Jane"
+        class="border rounded p-2 text-lg text-neutral-600 w-full outline-none hover:border-blue-600 focus:border-blue-600"
+        formControlName="FirstName" />
+      <app-input-error [errors]="errors" field="FirstName" />
+    </div>
+
+    <div class="flex flex-col gap-0.5">
+      <label class="font-semibold text-neutral-600 mb-1">Last Name <span class="text-red-600 font-bold">*</span></label>
+      <input type="text" placeholder="Doe"
+        class="border rounded p-2 text-lg text-neutral-600 w-full outline-none hover:border-blue-600 focus:border-blue-600"
+        formControlName="LastName" />
+      <app-input-error [errors]="errors" field="LastName" />
+    </div>
+
+    <div class="flex flex-col gap-0.5">
+      <label class="font-semibold text-neutral-600 mb-1">Email</label>
+      <input type="text" placeholder="janedoe@gmail.com"
+        class="border rounded p-2 text-lg text-neutral-600 w-full outline-none hover:border-blue-600 focus:border-blue-600"
+        formControlName="Email" />
+      <app-input-error [errors]="errors" field="Email" />
+    </div>
+    <div class="flex flex-col gap-0.5">
+      <label class="font-semibold text-neutral-600 mb-1">Phone</label>
+      <input type="text" placeholder="+33 11 22 33 44 55"
+        class="border rounded p-2 text-lg text-neutral-600 w-full outline-none hover:border-blue-600 focus:border-blue-600"
+        formControlName="Phone" />
+      <app-input-error [errors]="errors" field="Phone" />
+    </div>
+    <div class="flex flex-col gap-0.5">
+      <label class="font-semibold text-neutral-600 mb-1">Address</label>
+      <input type="text" placeholder="12 Rue Du Jardin, Montpellier"
+        class="border rounded p-2 text-lg text-neutral-600 w-full outline-none hover:border-blue-600 focus:border-blue-600"
+        formControlName="Address" />
+      <app-input-error [errors]="errors" field="Address" />
+    </div>
+    <div class="flex flex-col gap-0.5">
+      <label class="font-semibold text-neutral-600 mb-1">Country</label>
+      <input type="text" placeholder="France"
+        class="border rounded p-2 text-lg text-neutral-600 w-full outline-none hover:border-blue-600 focus:border-blue-600"
+        formControlName="Country" />
+      <app-input-error [errors]="errors" field="Country" />
+    </div>
+
+    <div class="flex flex-col gap-0.5">
+      <label class="font-semibold text-neutral-600 mb-1">Description</label>
+      <textarea type="text" rows="5" placeholder="The best client I've ever had!"
+        class="border rounded p-2 text-lg text-neutral-600 w-full outline-none hover:border-blue-600 focus:border-blue-600"
+        formControlName="Description"></textarea>
+      <app-input-error [errors]="errors" field="Description" />
+    </div>
+    <button type="submit" [disabled]="isLoading"
+      class="flex items-center justify-center mt-2 bg-blue-600 w-full font-semibold text-lg text-white py-2 rounded hover:bg-blue-700 transition duration-150 ease-in">
+      <ng-container *ngIf="isLoading">
+        <svg class="animate-spin h-7 w-7" viewBox="0 0 24 24">
+
+          <circle class="fill-transparent stroke-blue-600" cx="12" cy="12" r="10" stroke="" stroke-width="4">
+          </circle>
+          <path class="fill-white"
+            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+          </path>
+
+        </svg>
+      </ng-container>
+      <p *ngIf="!isLoading">Submit</p>
+    </button>
+
+    <ng-container *ngIf="!isLoading">
+      <p class="font-bold text-green-600 w-full text-nowrap text-center">
+        {{success}}</p>
+    </ng-container>
+  </form>
+</ng-container>

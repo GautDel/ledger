@@ -1,0 +1,10 @@
+<div class="w-full py-12 flex justify-center">
+  <div [ngSwitch]="selected"
+    class="rounded border-neutral-300 w-full lg:border lg:w-11/12 lg:h-fit p-4">
+    <app-account-view *ngSwitchCase="1" />
+    <app-client-view *ngSwitchCase="2" />
+    <app-project-view *ngSwitchCase="3" />
+    <app-invoice-view *ngSwitchCase="4" />
+    <app-invoice-gen-view *ngSwitchCase="5" />
+  </div>
+</div>

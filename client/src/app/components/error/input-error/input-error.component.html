@@ -1,0 +1,6 @@
+<ng-container *ngFor="let error of errors;">
+  <span *ngIf="error.Param === field" class="text-red-500 font-semibold">
+    {{error.Message}}
+  </span>
+</ng-container>
+

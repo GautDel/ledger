@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"ledgerbolt.systems/internal/queries"
 )
@@ -22,42 +21,72 @@ type Client struct {
 	Country     string    `json:"Country" validate:"required,max=255"`
 	CreatedAt   time.Time `json:"CreatedAt"`
 	UpdatedAt   time.Time `json:"UpdatedAt"`
+	Projects    []Project
+	Starred     bool    `json:"Starred"`
 }
 
 type SearchClient struct {
 	Search string `json:"Search" validate:"required,max=50"`
+	Sort string `json:"Sort" validate:"required,max=15"`
 }
 
-func GetClients(conn *pgxpool.Pool, ctx *gin.Context, userID string) ([]Client, error) {
-	var clients []Client
-	var client Client
+type StarClient struct {
+    Starred bool `json:"Starred"`
+}
 
-	rows, err := conn.Query(ctx, queries.GetClients, userID)
+func GetClients(conn *pgxpool.Pool, ctx *gin.Context, userID string, sortBy string) ([]Client, error) {
+	var clients []Client
+    key := "GetClients"+sortBy
+    query, exists := queries.QueryTemplates[key]
+    if !exists {
+        log.Println("Invalid query")
+    }
+
+	rows, err := conn.Query(ctx, query, userID)
 	if err != nil {
+        log.Println(err)
 		return clients, err
 	}
+
 	defer rows.Close()
 
-	_, err = pgx.ForEachRow(rows,
-		[]any{
-			&client.ID,
-			&client.FirstName,
-			&client.LastName,
-			&client.Description,
-			&client.Email,
-			&client.Phone,
-			&client.Address,
-			&client.Country,
-			&client.CreatedAt,
-			&client.UpdatedAt,
-		}, func() error {
-			clients = append(clients, client)
+	for rows.Next() {
+		var c Client
+		var p Project
+		err := rows.Scan(
+			&c.ID,
+			&c.FirstName,
+			&c.LastName,
+			&c.Description,
+			&c.Email,
+			&c.Phone,
+			&c.Address,
+			&c.Country,
+			&c.CreatedAt,
+			&c.UpdatedAt,
+			&c.Starred,
+			&p.ID,
+			&p.Name,
+			&p.Description,
+			&p.ClientID,
+			&p.Notes,
+			&p.CreatedAt,
+			&p.UpdatedAt,
+		)
+		if err != nil {
+			return clients, err
+		}
 
-			return nil
-		})
+		// Check if the current invoice is different from the last one
+		if len(clients) == 0 || c.ID != clients[len(clients)-1].ID {
+			clients = append(clients, c)
+		}
 
-	if err != nil {
-		return clients, err
+
+        if p.ID != 0 {
+		// Append the item to the last invoice
+		clients[len(clients)-1].Projects = append(clients[len(clients)-1].Projects, p)
+        }
 	}
 
 	return clients, nil
@@ -77,6 +106,7 @@ func GetClient(conn *pgxpool.Pool, clientID string, ctx *gin.Context, userID str
 		&client.Phone,
 		&client.Address,
 		&client.Country,
+		&client.Starred,
 	)
 	if err != nil {
 		log.Println(err)
@@ -86,38 +116,57 @@ func GetClient(conn *pgxpool.Pool, clientID string, ctx *gin.Context, userID str
 	return client, nil
 }
 
-func SearchClients(conn *pgxpool.Pool, searchStr string, ctx *gin.Context, userID string) ([]Client, error) {
+func SearchClients(conn *pgxpool.Pool, req SearchClient, ctx *gin.Context, userID string) ([]Client, error) {
 	var clients []Client
-	var client Client
+    key := "SearchClients"+req.Sort
+    query, exists := queries.QueryTemplates[key]
+    if !exists {
+        log.Println("Invalid query")
+    }
 
-	rows, err := conn.Query(ctx, queries.SearchClients, searchStr)
+	rows, err := conn.Query(ctx, query, req.Search, userID)
 	if err != nil {
 		return clients, err
 	}
 	defer rows.Close()
 
-	_, err = pgx.ForEachRow(rows,
-		[]any{
-			&client.ID,
-			&client.FirstName,
-			&client.LastName,
-			&client.Description,
-			&client.Email,
-			&client.Phone,
-			&client.Address,
-			&client.Country,
-			&client.CreatedAt,
-			&client.UpdatedAt,
-		}, func() error {
-			clients = append(clients, client)
+	for rows.Next() {
+		var c Client
+		var p Project
+		err := rows.Scan(
+			&c.ID,
+			&c.FirstName,
+			&c.LastName,
+			&c.Description,
+			&c.Email,
+			&c.Phone,
+			&c.Address,
+			&c.Country,
+			&c.CreatedAt,
+			&c.UpdatedAt,
+			&c.Starred,
+			&p.ID,
+			&p.Name,
+			&p.Description,
+			&p.ClientID,
+			&p.Notes,
+			&p.CreatedAt,
+			&p.UpdatedAt,
+		)
+		if err != nil {
+			return clients, err
+		}
 
-			return nil
-		})
+		// Check if the current invoice is different from the last one
+		if len(clients) == 0 || c.ID != clients[len(clients)-1].ID {
+			clients = append(clients, c)
+		}
 
-	if err != nil {
-		return clients, err
+        if p.ID != 0 {
+		// Append the item to the last invoice
+		clients[len(clients)-1].Projects = append(clients[len(clients)-1].Projects, p)
+        }
 	}
-
 	return clients, nil
 }
 
@@ -154,6 +203,27 @@ func UpdateClient(conn *pgxpool.Pool, client Client, ctx *gin.Context, clientID 
 		client.Phone,
 		client.Address,
 		client.Country,
+	    client.Starred,
+		clientID,
+		userID,
+	)
+	if err != nil {
+		return err
+	}
+
+	if cmd.RowsAffected() == 0 {
+		return errors.New("Client doesn't exist. Invalid ID")
+	}
+
+	return nil
+}
+
+func UpdateStarClient(conn *pgxpool.Pool, client StarClient, ctx *gin.Context, clientID string, userID string) error {
+
+	cmd, err := conn.Exec(
+		ctx,
+		queries.UpdateStarClient,
+	    client.Starred,
 		clientID,
 		userID,
 	)

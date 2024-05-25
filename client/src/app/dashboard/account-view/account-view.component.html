@@ -1,0 +1,104 @@
+<ng-container *ngIf="user">
+  <form [formGroup]="form" class="flex flex-col gap-y-4 p-4" (ngSubmit)="onSubmit()">
+
+    <p class="text-blue-600 font-semibold text-4xl text-center py-4">Account Details</p>
+
+    <div>
+      <label class="font-semibold text-neutral-700 text-lg mb-1">First Name <span
+          class="text-red-600 font-bold">*</span></label>
+      <input type="text" class="border rounded p-2 text-lg text-neutral-600 w-full outline-none hover:border-blue-600 focus:border-blue-600" formControlName="FirstName" />
+      <app-input-error [errors]="errors" field="FirstName" />
+    </div>
+
+    <div>
+      <label class="font-semibold text-neutral-700 text-lg mb-1">Last Name <span
+          class="text-red-600 font-bold">*</span></label>
+      <input type="text" class="border rounded p-2 text-lg text-neutral-600 w-full outline-none hover:border-blue-600 focus:border-blue-600" formControlName="LastName" />
+      <app-input-error [errors]="errors" field="LastName" />
+    </div>
+
+    <div>
+      <label class="font-semibold text-neutral-700 text-lg mb-1">Company Name <span
+          class="text-red-600 font-bold">*</span></label>
+      <input type="text" class="border rounded p-2 text-lg text-neutral-600 w-full outline-none hover:border-blue-600 focus:border-blue-600" formControlName="CompanyName" />
+      <app-input-error [errors]="errors" field="CompanyName" />
+    </div>
+
+    <div>
+      <label class="font-semibold text-neutral-700 text-lg mb-1">Address <span
+          class="text-red-600 font-bold">*</span></label>
+      <input type="text" class="border rounded p-2 text-lg text-neutral-600 w-full outline-none hover:border-blue-600 focus:border-blue-600" formControlName="Address" />
+      <app-input-error [errors]="errors" field="Address" />
+    </div>
+
+    <div>
+      <label class="font-semibold text-neutral-700 text-lg mb-1">Email <span
+          class="text-red-600 font-bold">*</span></label>
+      <input type="text" class="border rounded p-2 text-lg text-neutral-600 w-full outline-none hover:border-blue-600 focus:border-blue-600" formControlName="Email" />
+      <app-input-error [errors]="errors" field="Email" />
+    </div>
+
+    <div>
+      <label class="font-semibold text-neutral-700 text-lg mb-1">Phone</label>
+      <input type="text" class="border rounded p-2 text-lg text-neutral-600 w-full outline-none hover:border-blue-600 focus:border-blue-600" formControlName="Phone" />
+      <app-input-error [errors]="errors" field="Phone" />
+    </div>
+
+    <div>
+      <label class="font-semibold text-neutral-700 text-lg mb-1">Company Number</label>
+      <input type="text" class="border rounded p-2 text-lg text-neutral-600 w-full outline-none hover:border-blue-600 focus:border-blue-600" formControlName="CompanyNum"
+        placeholder="Ex: 222 222 2222 2222" />
+      <app-input-error [errors]="errors" field="CompanyNumber" />
+    </div>
+    <div class="flex gap-4 self-end items-center">
+
+
+      <p class="font-bold text-green-600 ">{{success}}</p>
+      <button type="submit"
+        class="flex gap-2 items-center rounded py-2 px-4 bg-blue-600 font-semibold text-white hover:bg-blue-700 transition ease-in duration-150">
+        <ng-container *ngIf="success === ' '">
+          <svg class="animate-spin h-5 w-5" viewBox="0 0 24 24">
+
+            <circle class="fill-transparent stroke-blue-600" cx="12" cy="12" r="10" stroke="" stroke-width="4">
+            </circle>
+            <path class="fill-white"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+            </path>
+
+          </svg>
+        </ng-container>
+        Save Changes</button>
+    </div>
+  </form>
+</ng-container>
+
+<ng-container *ngIf="!user">
+  <div class="flex flex-col gap-y-10">
+    <p class="text-blue-700 font-bold text-4xl text-center py-4">Company Details</p>
+
+    <div class="animate-pulse flex flex-col gap-2">
+      <p class="bg-neutral-300 text-lg mb-1 h-2 w-3/12 rounded"></p>
+      <p class="rounded bg-neutral-300 h-2 w-full"></p>
+    </div>
+
+    <div class="animate-pulse flex flex-col gap-2">
+      <p class="bg-neutral-300 text-lg mb-1 h-2 w-3/12 rounded"></p>
+      <p class="rounded bg-neutral-300 h-2 w-full"></p>
+    </div>
+
+    <div class="animate-pulse flex flex-col gap-2">
+      <p class="bg-neutral-300 text-lg mb-1 h-2 w-3/12 rounded"></p>
+      <p class="rounded bg-neutral-300 h-2 w-full"></p>
+    </div>
+
+    <div class="animate-pulse flex flex-col gap-2">
+      <p class="bg-neutral-300 text-lg mb-1 h-2 w-3/12 rounded"></p>
+      <p class="rounded bg-neutral-300 h-2 w-full"></p>
+    </div>
+
+    <div class="animate-pulse flex flex-col gap-2">
+      <p class="bg-neutral-300 text-lg mb-1 h-2 w-3/12 rounded"></p>
+      <p class="rounded bg-neutral-300 h-2 w-full"></p>
+    </div>
+  </div>
+</ng-container>

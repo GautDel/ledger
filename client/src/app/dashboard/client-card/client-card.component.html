@@ -1,0 +1,119 @@
+<ng-container>
+  <div [ngStyle]="{'top.px':clientY}"
+    class="bg-white lg:sticky lg:top-4 flex flex-col gap-4 p-4 lg:border lg:rounded lg:border-neutral-300 absolute bottom-0 left-0 w-full h-full overflow-scroll lg:h-fit lg:min-w-96">
+
+    <div (touchcancel)="onMouseExit()" (touchend)="onMouseUp()" (touchstart)="onMouseDown()"
+      (touchmove)="onMouseMove($event)" class="flex justify-center w-full pt-4 pb-2 lg:hidden">
+      <div class="bg-neutral-300 h-2 w-1/4 rounded-full cursor-pointer">
+      </div>
+    </div>
+
+    <div class="flex justify-between">
+      <p class="text-blue-600 font-semibold text-xl flex items-center">{{client.FirstName}} {{client.LastName}}
+        <svg (click)="starClient(client.ID!)" [ngClass]="{'fill-yellow-500 stroke-transparent': starred,
+                      'stroke-neutral-700 fill-transparent':!starred}" class="w-4 ml-2 cursor-pointer"
+          viewBox="0 0 398 380" xmlns="http://www.w3.org/2000/svg">
+          <path
+            d="M213.127 10.8985L258.282 110.822C260.974 116.778 266.609 120.872 273.105 121.591L382.092 133.659C395.35 135.127 400.685 151.545 390.821 160.526L309.742 234.349C304.91 238.75 302.757 245.374 304.081 251.774L326.282 359.156C328.983 372.219 315.017 382.366 303.428 375.761L208.163 321.463C202.484 318.226 195.52 318.226 189.841 321.463L94.5757 375.761C82.9864 382.366 69.0206 372.219 71.7215 359.156L93.9233 251.774C95.2466 245.374 93.0944 238.75 88.2616 234.349L7.18252 160.526C-2.68098 151.545 2.6535 135.127 15.9121 133.659L124.899 121.591C131.395 120.872 137.03 116.778 139.721 110.822L184.877 10.8985C190.371 -1.25748 207.633 -1.25749 213.127 10.8985Z"
+            stroke-width="10" />
+        </svg>
+      </p>
+
+      <div class="flex gap-2">
+        <button (click)="showOptions = true" [ngClass]="{'hidden': showOptions}"
+          class="text-2xl group border rounded border-neutral-300 p-2 hover:bg-neutral-200 transition ease-in duration-150">
+          <svg class="w-4 h-4 fill-neutral-600" viewBox="0 0 779 157" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="100.5" cy="100.5" r="100.5" />
+            <circle cx="389.5" cy="100.5" r="100.5" />
+            <circle cx="700.5" cy="100.5" r="100.5" />
+          </svg>
+        </button>
+
+        <ng-container *ngIf="showOptions === true">
+          <button (click)="toggleEditHandler()"
+            class="group border rounded border-neutral-300 p-2 hover:bg-blue-500 hover:border-blue-500 transition ease-in duration-150">
+            <svg class="w-4 h-4 fill-neutral-600 group-hover:fill-white" viewBox="0 0 585 655" fill="none"
+              xmlns="http://www.w3.org/2000/svg">
+              <path
+                d="M76.4212 542.726L100.73 398.917L311.457 174.05C314.479 170.826 319.541 170.662 322.765 173.683L442.645 286.025C445.869 289.046 446.033 294.109 443.012 297.332L232.285 522.2L85.9 551.899C80.3964 553.016 75.4852 548.263 76.4212 542.726Z" />
+              <path
+                d="M100.73 398.917L76.4212 542.726C75.4852 548.263 80.3964 553.016 85.9 551.899L232.285 522.2M100.73 398.917L232.285 522.2M100.73 398.917L311.457 174.05C314.479 170.826 319.541 170.662 322.765 173.683L442.645 286.025C445.869 289.046 446.033 294.109 443.012 297.332L232.285 522.2" />
+              <rect x="573.988" y="161.689" width="126.98" height="182.617" rx="8"
+                transform="rotate(133.141 573.988 161.689)" />
+            </svg>
+          </button>
+          <button (click)="showConfirmation = true"
+            class="bg-red-500 rounded p-2 hover:bg-red-600 transition ease-in duration-150">
+            <svg class="rotate-45 w-4 h-4 stroke-white" viewBox="0 0 362 361" fill="none"
+              xmlns="http://www.w3.org/2000/svg">
+              <path d="M331.5 180.5L30.5 180.5" stroke-width="80" stroke-linecap="round" />
+              <path d="M181 30L181 331" stroke-width="80" stroke-linecap="round" />
+            </svg>
+          </button>
+        </ng-container>
+      </div>
+    </div>
+
+    <div class="flex flex-col gap-2">
+      <p class="font-semibold">Phone: <span class="font-normal">{{client.Phone}}</span></p>
+      <p class="font-semibold">Email: <span class="font-normal">{{client.Email}}</span></p>
+      <p class="font-semibold">Address: <span class="font-normal">{{client.Address}}, {{client.Country}}</span></p>
+      <p class="font-semibold">Country: <span class="font-normal">{{client.Country}}</span></p>
+      <hr class="my-2">
+      <form>
+        <label for="" class="font-semibold text-lg">Notes</label>
+        <textarea disabled class="w-full border rounded border-neutral-300 p-4 outline-none"
+          rows="10">{{client.Description}}</textarea>
+      </form>
+    </div>
+
+    <div>
+      <ng-container *ngIf="client.Projects">
+        <p class="font-semibold text-lg mb-1">Projects</p>
+        <div class="flex flex-wrap gap-2">
+
+          <ng-container *ngFor="let project of client.Projects; index as i;">
+            <button
+              class="border border-neutral-300 rounded-full px-2 py-1 text-sm text-left font-semibold hover:border-blue-600 hover:bg-blue-600 hover:text-white transition ease-in duration-150">
+              {{project.Name}}</button>
+          </ng-container>
+
+        </div>
+      </ng-container>
+
+      <ng-container *ngIf="!client.Projects">
+        <p class="font-semibold text-lg">Projects</p>
+        <p class="text-neutral-500 font-semibold">No projects</p>
+      </ng-container>
+    </div>
+
+    <div>
+      <ng-container>
+        <p class="font-semibold text-lg mb-1">Invoices</p>
+        <div class="flex flex-wrap gap-2">
+
+          <button
+            class="border border-neutral-300 rounded-full px-2 py-1 text-sm text-left font-semibold hover:border-blue-600 hover:bg-blue-600 hover:text-white transition ease-in duration-150">
+            #20240602</button>
+          <button
+            class="border border-neutral-300 rounded-full px-2 py-1 text-sm text-left font-semibold hover:border-blue-600 hover:bg-blue-600 hover:text-white transition ease-in duration-150">
+            #20240602</button> <button
+            class="border border-neutral-300 rounded-full px-2 py-1 text-sm text-left font-semibold hover:border-blue-600 hover:bg-blue-600 hover:text-white transition ease-in duration-150">
+            #20240602</button> <button
+            class="border border-neutral-300 rounded-full px-2 py-1 text-sm text-left font-semibold hover:border-blue-600 hover:bg-blue-600 hover:text-white transition ease-in duration-150">
+            #20240602</button> <button
+            class="border border-neutral-300 rounded-full px-2 py-1 text-sm text-left font-semibold hover:border-blue-600 hover:bg-blue-600 hover:text-white transition ease-in duration-150">
+            #20240602</button> <button
+            class="border border-neutral-300 rounded-full px-2 py-1 text-sm text-left font-semibold hover:border-blue-600 hover:bg-blue-600 hover:text-white transition ease-in duration-150">
+            #20240602</button> <button
+            class="border border-neutral-300 rounded-full px-2 py-1 text-sm text-left font-semibold hover:border-blue-600 hover:bg-blue-600 hover:text-white transition ease-in duration-150">
+            #20240602</button>
+
+        </div>
+      </ng-container>
+    </div>
+
+    <app-confirmation-dialog [show]="showConfirmation" (toggleConfirmationEvent)="rCloseConfirmEvent()"
+      (confirmDelEvent)="rConfirmDel()" />
+  </div>
+</ng-container>

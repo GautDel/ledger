@@ -69,7 +69,7 @@ func GetInvoices(
 
 	rows, err := conn.Query(ctx, queries.GetInvoices, userID)
 	if err != nil {
-		log.Println("skill issue", err)
+		log.Println(err)
 		return invoices, err
 	}
 

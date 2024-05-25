@@ -1,0 +1,27 @@
+<div (click)="toggleNav()"
+  class="flex items-center absolute left-0 bottom-0 w-full
+  bg-white cursor-pointer hover:bg-neutral-200 transition
+  ease-in duration-150 border-t border-neutral-300 py-6 justify-end pr-2">
+  <ng-container *ngIf="open">
+    <svg class="w-3" viewBox="0 0 106 171" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M85.5 20.5L21.2071 84.7929C20.8166 85.1834 20.8166 85.8166 21.2071 86.2071L85.5 150.5" stroke="#404040"
+        stroke-width="30" stroke-linecap="" />
+    </svg>
+    <svg class="w-3" viewBox="0 0 106 171" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M85.5 20.5L21.2071 84.7929C20.8166 85.1834 20.8166 85.8166 21.2071 86.2071L85.5 150.5" stroke="#404040"
+        stroke-width="30" stroke-linecap="" />
+    </svg>
+  </ng-container>
+
+  <ng-container *ngIf="!open">
+
+    <svg class="w-3 rotate-180 self-center" viewBox="0 0 106 171" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M85.5 20.5L21.2071 84.7929C20.8166 85.1834 20.8166 85.8166 21.2071 86.2071L85.5 150.5" stroke="#404040"
+        stroke-width="30" stroke-linecap="" />
+    </svg>
+    <svg class="w-3 rotate-180 self-center" viewBox="0 0 106 171" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M85.5 20.5L21.2071 84.7929C20.8166 85.1834 20.8166 85.8166 21.2071 86.2071L85.5 150.5" stroke="#404040"
+        stroke-width="30" stroke-linecap="" />
+    </svg>
+  </ng-container>
+</div>

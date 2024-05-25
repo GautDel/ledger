@@ -1,0 +1,26 @@
+<ng-container *ngIf="auth.isAuthenticated$ | async; else loggedOut">
+  <div class="justify-center items-center gap-4 flex ">
+    <p *ngIf="auth.user$ | async as user" class="hidden md:block font-semibold text-blue-600">
+      {{ user.name }}
+    </p>
+
+    <ng-container *ngIf="router.url !== '/dashboard'">
+      <a [routerLink]="['/dashboard']">
+        <button
+          class="border border-neutral-300 text-neutral-600 px-3 py-1.5 rounded font-bold text-md hover:bg-blue-600 hover:text-white hover:border-blue-600 transition ease-in duration-150">Dashboard</button>
+      </a>
+    </ng-container>
+
+    <button
+      class="border border-neutral-300 text-neutral-600 px-3 py-1.5 rounded font-bold text-md hover:bg-red-500 hover:text-white hover:border-red-500 transition ease-in duration-150"
+      (click)="auth.logout({ logoutParams: { returnTo: document.location.origin } })">
+      Sign out
+    </button>
+  </div>
+</ng-container>
+
+<ng-template #loggedOut>
+  <button
+    class="border border-neutral-300 text-neutral-600 px-2 py-1.5 rounded font-bold text-md hover:bg-blue-600 hover:text-white hover:border-blue-600 transition ease-in duration-150"
+    (click)="auth.loginWithRedirect({appState: {target:'/dashboard'}})">Sign in</button>
+</ng-template>

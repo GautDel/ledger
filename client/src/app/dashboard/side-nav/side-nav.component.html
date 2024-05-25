@@ -1,0 +1,23 @@
+<div [ngClass]="open ? 'w-52':'w-10'"
+  class="transition-all ease-in duration-150 p-5 bg-white border-r border-neutral-300 h-full md:relative whitespace-nowrap absolute left-0 top-0">
+  <ul class="flex flex-col gap-y-2">
+    <li (click)="itemSelect(item.id)"
+      class="flex cursor-pointer hover:text-blue-700 transition-all ease-in duration-150" *ngFor="let item of navItems"
+      [ngClass]="{
+      'text-blue-600': selected === item.id,
+      'text-neutral-700': selected !== item.id}">
+
+      <div class="flex -translate-x-1/2 items-center">
+        <app-nav-icon [navItem]="item.id"/>
+      </div>
+      <p [ngClass]="{
+      'w-52': open,
+      'w-0': !open}" class="truncate text-lg font-semibold cursor-pointer transition-all ease-in duration-150">
+        {{item.name}}</p>
+    </li>
+  </ul>
+
+  <div>
+    <app-toggle-button [open]="open" (toggleEvent)="receiveToggle($event)"></app-toggle-button>
+  </div>
+</div>

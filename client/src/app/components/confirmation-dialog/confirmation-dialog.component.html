@@ -1,0 +1,17 @@
+<ng-container *ngIf="show">
+
+  <div class="flex justify-center items-center absolute top-0 left-0 w-full h-full bg-white/75 p-8">
+    <div class="border border-neutral-300 rounded bg-white p-4 flex flex-col justify-center items-center gap-8">
+      <p class="text-center text-neutral-600 font-semibold">
+        Are you sure you want to delete this client and all their associated data?
+      </p>
+      <div class="w-full flex justify-center gap-8">
+        <button (click)="confirmDelHandler()"
+          class="bg-red-500 rounded py-2 w-full font-semibold text-white hover:bg-red-600 transition ease-in duration-150">Delete</button>
+        <button (click)="toggleConfirmation()"
+          class="border border-neutral-300 rounded hover:bg-neutral-200 py-2 w-full font-semibold text-neutral-600 transition ease-in duration-150">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+</ng-container>

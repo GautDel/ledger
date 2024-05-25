@@ -9,12 +9,14 @@ import (
 	"ledgerbolt.systems/internal/db"
 	"ledgerbolt.systems/internal/models"
 	"ledgerbolt.systems/internal/validator"
+	"ledgerbolt.systems/utils"
 )
 
 func getClientsHandler(ctx *gin.Context) {
 	conn := db.GetPool()
+	sortBy := ctx.Param("sort")
 
-	clients, err := models.GetClients(conn, ctx, auth.GetUser(ctx))
+	clients, err := models.GetClients(conn, ctx, auth.GetUser(ctx), sortBy)
 	if err != nil {
 		log.Println(err)
 		ctx.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to retrieve clients from database", "error": err.Error()})
@@ -31,6 +33,7 @@ func getClientHandler(ctx *gin.Context) {
 	client, err := models.GetClient(conn, clientID, ctx, auth.GetUser(ctx))
 	if err != nil {
 		log.Println(err)
+
 		ctx.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to retrieve client from database", "error": err.Error()})
 		return
 	}
@@ -55,7 +58,7 @@ func searchClientsHandler(ctx *gin.Context) {
 		return
 	}
 
-	clients, err := models.SearchClients(conn, reqBody.Search, ctx, auth.GetUser(ctx))
+	clients, err := models.SearchClients(conn, reqBody, ctx, auth.GetUser(ctx))
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Failed to find clients", "error": err.Error()})
 		return
@@ -77,7 +80,8 @@ func newClientHandler(ctx *gin.Context) {
 	err = validator.Validate(&reqBody)
 	if err != nil {
 		log.Println(err)
-		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Failed to create client", "error": err.Error()})
+		errMsg := utils.ErrorHandler(err)
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Failed to create client", "error": errMsg})
 		return
 	}
 
@@ -103,9 +107,11 @@ func updateClientHandler(ctx *gin.Context) {
 	}
 
 	err = validator.Validate(&reqBody)
+
 	if err != nil {
 		log.Println(err)
-		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Failed to update client", "error": err.Error()})
+		errMsg := utils.ErrorHandler(err)
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Failed to update client", "error": errMsg})
 		return
 	}
 
@@ -117,6 +123,35 @@ func updateClientHandler(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{"message": "Client successfully updated!"})
+}
+
+func starClientHandler(ctx *gin.Context) {
+	conn := db.GetPool()
+	clientID := ctx.Param("id")
+
+	var reqBody models.StarClient
+	err := ctx.ShouldBindJSON(&reqBody)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Failed to read request body", "error": err.Error()})
+		return
+	}
+
+	err = validator.Validate(&reqBody)
+	if err != nil {
+		log.Println(err)
+		errMsg := utils.ErrorHandler(err)
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Failed to update client", "error": errMsg})
+		return
+	}
+
+	err = models.UpdateStarClient(conn, reqBody, ctx, clientID, auth.GetUser(ctx))
+	if err != nil {
+		log.Println(err)
+		ctx.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to update client", "error": err.Error()})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"message": "Client successfully starred!"})
 }
 
 func destroyClientHandler(ctx *gin.Context) {

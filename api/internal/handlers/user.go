@@ -9,6 +9,7 @@ import (
 	"ledgerbolt.systems/internal/db"
 	"ledgerbolt.systems/internal/models"
 	"ledgerbolt.systems/internal/validator"
+	"ledgerbolt.systems/utils"
 )
 
 func GetUserHandler(ctx *gin.Context) {
@@ -17,7 +18,6 @@ func GetUserHandler(ctx *gin.Context) {
 	user, err := models.GetUser(conn, ctx, auth.GetUser(ctx))
 	if err != nil {
 		log.Println(err)
-        log.Println("hit here")
 		ctx.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to get user from database", "error": err.Error()})
 		return
 	}
@@ -31,23 +31,21 @@ func UpdateUserHandler(ctx *gin.Context) {
 
 	err := ctx.ShouldBindJSON(&reqBody)
 	if err != nil {
-        log.Println("hit here")
 		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Failed to read request body", "error": err.Error()})
 		return
 	}
 
-    err = validator.Validate(&reqBody)
+	err = validator.Validate(&reqBody)
 	if err != nil {
 		log.Println(err)
-        log.Println("hit here 2")
-		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Failed to update user", "error": err.Error()})
-        return
+        errMsg := utils.ErrorHandler(err)
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": "Failed to update user", "error": errMsg})
+		return
 	}
 
 	err = models.UpdateUser(conn, reqBody, ctx, auth.GetUser(ctx))
 	if err != nil {
 		log.Println(err)
-        log.Println("hit here 3")
 		ctx.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to update user", "error": err.Error()})
 		return
 	}

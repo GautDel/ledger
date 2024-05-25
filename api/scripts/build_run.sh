@@ -11,7 +11,7 @@ if [ $? -eq 0 ]; then
     echo "Build successful. Running $EXECUTABLE_NAME..."
     
     # Run the executable
-    ./"$EXECUTABLE_NAME"
+    sudo ./"$EXECUTABLE_NAME"
 else
     echo "Build failed."
 fi

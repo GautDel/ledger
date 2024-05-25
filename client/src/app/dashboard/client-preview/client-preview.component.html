@@ -1,0 +1,37 @@
+<div (click)="setClient(); onClick()"
+  class="rounded border border-neutral-300 flex flex-col px-4 pt-2 pb-4 gap-y-4 text-neutral-700 hover:border-blue-600 cursor-pointer">
+  <p class="flex gap-1 font-semibold text-lg">
+    <span>{{client.FirstName}}</span>
+    <span>{{client.LastName}}</span>
+    <svg [ngClass]="{'fill-yellow-500 stroke-transparent': client.Starred}"
+      class="stroke-neutral-700 w-4 ml-2 fill-transparent " viewBox="0 0 398 380" xmlns="http://www.w3.org/2000/svg">
+      <path
+        d="M213.127 10.8985L258.282 110.822C260.974 116.778 266.609 120.872 273.105 121.591L382.092 133.659C395.35 135.127 400.685 151.545 390.821 160.526L309.742 234.349C304.91 238.75 302.757 245.374 304.081 251.774L326.282 359.156C328.983 372.219 315.017 382.366 303.428 375.761L208.163 321.463C202.484 318.226 195.52 318.226 189.841 321.463L94.5757 375.761C82.9864 382.366 69.0206 372.219 71.7215 359.156L93.9233 251.774C95.2466 245.374 93.0944 238.75 88.2616 234.349L7.18252 160.526C-2.68098 151.545 2.6535 135.127 15.9121 133.659L124.899 121.591C131.395 120.872 137.03 116.778 139.721 110.822L184.877 10.8985C190.371 -1.25748 207.633 -1.25749 213.127 10.8985Z"
+        stroke-width="10" />
+    </svg>
+  </p>
+
+  <ng-container *ngIf="client.Projects !== null">
+
+    <div class="flex flex-wrap gap-4">
+
+      <ng-container *ngFor="let project of client.Projects; index as i;">
+        <button *ngIf="i < show"
+          class="break-words border border-neutral-300 rounded-full px-3 py-1 text-sm text-left font-semibold hover:border-blue-600 hover:bg-blue-600 hover:text-white transition ease-in duration-150">
+          {{project.Name}}</button>
+      </ng-container>
+
+      <ng-container *ngIf="show === initProjects && client.Projects.length > initProjects">
+        <button (click)="toggleProjects()"
+          class="rounded px-2 py-1 bg-neutral-200 text-neutral-600 text-sm font-bold hover:bg-blue-600 hover:text-white transition ease-in duration-150">{{client.Projects.length
+          - 3}}
+          more</button>
+      </ng-container>
+
+      <ng-container *ngIf="show !== initProjects">
+        <button (click)="show = initProjects"
+          class="rounded px-2 py-1 bg-neutral-200 text-neutral-600 text-sm font-bold hover:bg-blue-700 hover:text-white transition ease-in duration-150">Hide</button>
+      </ng-container>
+    </div>
+  </ng-container>
+</div>
