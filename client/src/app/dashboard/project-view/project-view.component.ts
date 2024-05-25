@@ -3,6 +3,8 @@ import { Component } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { Project } from '../project';
 import { ProjectPreviewComponent } from '../project-preview/project-preview.component';
+import { ProjectService } from '../../services/project.service';
+import { debounceTime, distinctUntilChanged, switchMap, tap } from 'rxjs';
 
 @Component({
   selector: 'app-project-view',
@@ -25,6 +27,8 @@ export class ProjectViewComponent {
   chosenProject: Project;
   isLoading: boolean = false;
 
+  constructor(private ps: ProjectService) {}
+
   showProjectCard() {
     this.projectCard = true;
     this.toggleCard = false;
@@ -33,5 +37,53 @@ export class ProjectViewComponent {
 
   rProject(p: Project) {
     this.chosenProject = p;
+  }
+
+  searchProjects(s: string) {
+    if (s) {
+      return this.ps.searchProjects({ Search: s, Sort: this.sort.value }).pipe(tap(_ => this.isLoading = false))
+    } else {
+      return this.ps.getProjects(this.sort.value).pipe(tap(_ => this.isLoading = false))
+    }
+  }
+
+  sortClients(s: string) {
+    if (this.search.value) {
+      return this.ps.searchProjects({ Search: this.search.value, Sort: s }).pipe(tap(_ => this.isLoading = false))
+    } else {
+      return this.ps.getProjects(s).pipe(tap(_ => this.isLoading = false))
+    }
+  }
+
+  ngOnInit() {
+    this.ps.getProjects(this.sort.value).subscribe((data) => {
+      this.projects = data
+    })
+
+    this.search.valueChanges.pipe(
+      debounceTime(300),
+      distinctUntilChanged(),
+      tap(_ => {
+        this.isLoading = true
+      }),
+      switchMap((searchTerm) => this.searchProjects(searchTerm))
+    ).subscribe({
+      next: (data) => {
+        this.projects = data
+      },
+    })
+
+    this.sort.valueChanges.pipe(
+      debounceTime(300),
+      distinctUntilChanged(),
+      tap(_ => {
+        this.isLoading = true
+      }),
+      switchMap((searchTerm) => this.sortClients(searchTerm))
+    ).subscribe({
+      next: (data) => {
+        this.projects = data
+      },
+    })
   }
 }
