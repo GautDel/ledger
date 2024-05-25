@@ -1,1 +1,45 @@
-<p>project-view works!</p>
+<div class="lg:relative lg:flex lg:h-full">
+  <div class="w-full">
+    <div [ngClass]="{'lg:pr-4': toggleCard || projectCard || editCard}" class="flex pb-8">
+
+      <form class="flex w-full">
+        <input
+          class="w-full px-2 py-2 border rounded-l border-neutral-300 outline-none hover:border-blue-600 focus:border-blue-600"
+          type="text" placeholder="Search..." [formControl]="search">
+        <select [formControl]="sort"
+          class="mr-4 bg-white border border-l-0 border-neutral-300 rounded-r px-2 text-neutral-500 font-semibold text-sm">
+          <option value="NEW">Newest</option>
+          <option value="OLD">Oldest</option>
+          <option value="ASC">A - Z</option>
+          <option value="DESC">Z - A</option>
+        </select>
+      </form>
+
+
+      <button [ngClass]="{'bg-red-500 hover:bg-red-600': toggleCard}"
+        class="bg-blue-600 rounded px-3 hover:bg-blue-700 transition ease-in duration-150"
+        (click)="toggleCard = !toggleCard; projectCard = false; editCard = false">
+        <svg [ngClass]="{'rotate-45': toggleCard}" class="w-4 stroke-white" viewBox="0 0 362 361" fill="none"
+          xmlns="http://www.w3.org/2000/svg">
+          <path d="M331.5 180.5L30.5 180.5" stroke-width="80" stroke-linecap="round" />
+          <path d="M181 30L181 331" stroke-width="80" stroke-linecap="round" />
+        </svg>
+      </button>
+    </div>
+
+    <div [ngClass]="{'lg:pr-4': toggleCard || projectCard || editCard}" class="flex flex-col gap-4">
+      <ng-container *ngFor="let project of projects">
+        <app-project-preview (showCard)="showProjectCard()" [project]="project"
+          (setProjectEvent)="rProject($event)" />
+      </ng-container>
+
+      <ng-container *ngIf="isLoading">
+        <p class="text-center font-semibold text-neutral-500 py-4 text-lg">Loading...</p>
+      </ng-container>
+
+      <ng-container *ngIf="!projects">
+        <p class="text-center font-semibold text-neutral-500 py-4 text-lg">No projects found</p>
+      </ng-container>
+    </div>
+  </div>
+</div>

@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { AuthService } from '@auth0/auth0-angular';
 import { Observable, concatMap, take } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -16,7 +17,7 @@ export class UserService {
         take(1),
         concatMap(() =>
           this.http.get(
-            encodeURI(`https://192.168.1.15:80/user/`)
+            encodeURI(environment.apiURL + "/user/")
           )
         ),
       )
@@ -27,7 +28,7 @@ export class UserService {
       take(1),
       concatMap(() => {
         return this.http.put(
-          encodeURI(`https://192.168.1.15:80/user/update`),
+          encodeURI(environment.apiURL + "/user/update"),
           data
         )
       })

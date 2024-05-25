@@ -1,7 +1,8 @@
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient} from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { AuthService } from '@auth0/auth0-angular';
-import { Observable, concatMap, take } from 'rxjs';
+import { Observable, concatMap, take} from 'rxjs';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -17,7 +18,7 @@ export class ClientService {
       take(1),
       concatMap(() =>
         this.http.get(
-          encodeURI('https://192.168.1.15:80/clients/sort/' + sortBy),
+          encodeURI(environment.apiURL + '/clients/sort/' + sortBy),
         )
       )
     )
@@ -28,7 +29,7 @@ export class ClientService {
       take(1),
       concatMap(() =>
         this.http.get(
-          encodeURI('https://192.168.1.15:80/clients/' + id)
+          encodeURI(environment.apiURL + '/clients/' + id)
         )
       )
     )
@@ -39,7 +40,7 @@ export class ClientService {
       take(1),
       concatMap(() =>
         this.http.post(
-          encodeURI('https://192.168.1.15:80/clients/search'),
+          encodeURI(environment.apiURL + '/clients/search'),
           data,
         )
       )
@@ -51,7 +52,7 @@ export class ClientService {
       take(1),
       concatMap(() => {
         return this.http.post(
-          encodeURI('https://192.168.1.15:80/clients/create'),
+          encodeURI(environment.apiURL + '/clients/create'),
           data
         )
       })
@@ -63,7 +64,7 @@ export class ClientService {
       take(1),
       concatMap(() => {
         return this.http.put(
-          encodeURI("https://192.168.1.15:80/clients/update/" + id),
+          encodeURI(environment.apiURL + "/clients/update/" + id),
           data
         )
       })
@@ -75,7 +76,7 @@ export class ClientService {
       take(1),
       concatMap(() => {
         return this.http.put(
-          encodeURI("https://192.168.1.15:80/clients/star/" + id),
+          encodeURI(environment.apiURL + "/clients/star/" + id),
           data
         )
       })
@@ -87,7 +88,7 @@ export class ClientService {
       take(1),
       concatMap(() => {
         return this.http.delete(
-          encodeURI('https://192.168.1.15:80/clients/remove/' + id)
+          encodeURI(environment.apiURL + '/clients/remove/' + id)
         )
       })
     )

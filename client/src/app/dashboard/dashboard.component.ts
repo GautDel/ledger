@@ -17,7 +17,7 @@ import { HeaderComponent } from '../header/header.component';
 })
 export class DashboardComponent {
 
-  selected: number = 2;
+  selected: number = 3;
 
   navItems: NavItem[] = [
     { id: 1, name: "Account"},
