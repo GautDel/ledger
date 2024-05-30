@@ -33,4 +33,16 @@ export class ProjectService {
       )
     )
   }
+
+  createProject(data: any): Observable<any> {
+    return this.auth.user$.pipe(
+      take(1),
+      concatMap(() =>
+        this.http.post(
+          encodeURI(environment.apiURL + '/projects/create'),
+          data,
+        )
+      )
+    )
+  }
 }

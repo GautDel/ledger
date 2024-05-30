@@ -9,6 +9,7 @@ import { CommonModule } from '@angular/common';
   templateUrl: './project-preview.component.html',
   styleUrl: './project-preview.component.css'
 })
+
 export class ProjectPreviewComponent {
 
   @Input() project: Project;
@@ -22,4 +23,3 @@ export class ProjectPreviewComponent {
     this.showCard.emit();
   }
 }
-

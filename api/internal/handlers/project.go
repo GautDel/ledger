@@ -13,8 +13,9 @@ import (
 
 func getProjects(ctx *gin.Context) {
 	conn := db.GetPool()
+    sortBy := ctx.Param("sort")
 
-	projects, err := models.GetProjects(conn, ctx, auth.GetUser(ctx))
+	projects, err := models.GetProjects(conn, ctx, auth.GetUser(ctx), sortBy)
 	if err != nil {
 		log.Println(err)
 		ctx.JSON(http.StatusInternalServerError,
@@ -97,12 +98,12 @@ func createProject(ctx *gin.Context) {
 	err = models.CreateProject(conn, reqBody, ctx, auth.GetUser(ctx))
 	if err != nil {
 		log.Println(err)
-		ctx.JSON(http.StatusInternalServerError, 
-            gin.H{
-                "message": "Failed to create project", 
-                "error": err.Error(),
-            },
-        )
+		ctx.JSON(http.StatusInternalServerError,
+			gin.H{
+				"message": "Failed to create project",
+				"error":   err.Error(),
+			},
+		)
 		return
 	}
 
@@ -115,7 +116,7 @@ func updateProject(ctx *gin.Context) {
 	var reqBody models.Project
 	pID := ctx.Param("id")
 
-    err := ctx.ShouldBindJSON(&reqBody)
+	err := ctx.ShouldBindJSON(&reqBody)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest,
 			gin.H{
@@ -157,7 +158,7 @@ func destroyProject(ctx *gin.Context) {
 	conn := db.GetPool()
 	pID := ctx.Param("id")
 
-    err := models.DestroyProject(conn, ctx, pID, auth.GetUser(ctx))
+	err := models.DestroyProject(conn, ctx, pID, auth.GetUser(ctx))
 	if err != nil {
 		log.Println(err)
 		ctx.JSON(http.StatusInternalServerError,

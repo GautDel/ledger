@@ -1,1 +1,6 @@
-<p>project-preview works!</p>
+<div>
+  <p>{{project.Name}}</p>
+  <ng-container *ngFor="let client of project.Clients;">
+    {{client.FirstName}} {{client.LastName}}
+  </ng-container>
+</div>

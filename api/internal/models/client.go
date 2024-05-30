@@ -22,29 +22,30 @@ type Client struct {
 	CreatedAt   time.Time `json:"CreatedAt"`
 	UpdatedAt   time.Time `json:"UpdatedAt"`
 	Projects    []Project
-	Starred     bool    `json:"Starred"`
+	Starred     bool `json:"Starred"`
+	DelPivot    bool `json:"DelPivot"`
 }
 
 type SearchClient struct {
 	Search string `json:"Search" validate:"required,max=50"`
-	Sort string `json:"Sort" validate:"required,max=15"`
+	Sort   string `json:"Sort" validate:"required,max=15"`
 }
 
 type StarClient struct {
-    Starred bool `json:"Starred"`
+	Starred bool `json:"Starred"`
 }
 
 func GetClients(conn *pgxpool.Pool, ctx *gin.Context, userID string, sortBy string) ([]Client, error) {
 	var clients []Client
-    key := "GetClients"+sortBy
-    query, exists := queries.QueryTemplates[key]
-    if !exists {
-        log.Println("Invalid query")
-    }
+	key := "GetClients" + sortBy
+	query, exists := queries.QueryTemplates[key]
+	if !exists {
+		log.Println("Invalid query")
+	}
 
 	rows, err := conn.Query(ctx, query, userID)
 	if err != nil {
-        log.Println(err)
+		log.Println(err)
 		return clients, err
 	}
 
@@ -68,7 +69,6 @@ func GetClients(conn *pgxpool.Pool, ctx *gin.Context, userID string, sortBy stri
 			&p.ID,
 			&p.Name,
 			&p.Description,
-			&p.ClientID,
 			&p.Notes,
 			&p.CreatedAt,
 			&p.UpdatedAt,
@@ -82,11 +82,10 @@ func GetClients(conn *pgxpool.Pool, ctx *gin.Context, userID string, sortBy stri
 			clients = append(clients, c)
 		}
 
-
-        if p.ID != 0 {
-		// Append the item to the last invoice
-		clients[len(clients)-1].Projects = append(clients[len(clients)-1].Projects, p)
-        }
+		if p.ID != 0 {
+			// Append the item to the last invoice
+			clients[len(clients)-1].Projects = append(clients[len(clients)-1].Projects, p)
+		}
 	}
 
 	return clients, nil
@@ -118,11 +117,11 @@ func GetClient(conn *pgxpool.Pool, clientID string, ctx *gin.Context, userID str
 
 func SearchClients(conn *pgxpool.Pool, req SearchClient, ctx *gin.Context, userID string) ([]Client, error) {
 	var clients []Client
-    key := "SearchClients"+req.Sort
-    query, exists := queries.QueryTemplates[key]
-    if !exists {
-        log.Println("Invalid query")
-    }
+	key := "SearchClients" + req.Sort
+	query, exists := queries.QueryTemplates[key]
+	if !exists {
+		log.Println("Invalid query")
+	}
 
 	rows, err := conn.Query(ctx, query, req.Search, userID)
 	if err != nil {
@@ -148,7 +147,6 @@ func SearchClients(conn *pgxpool.Pool, req SearchClient, ctx *gin.Context, userI
 			&p.ID,
 			&p.Name,
 			&p.Description,
-			&p.ClientID,
 			&p.Notes,
 			&p.CreatedAt,
 			&p.UpdatedAt,
@@ -162,10 +160,10 @@ func SearchClients(conn *pgxpool.Pool, req SearchClient, ctx *gin.Context, userI
 			clients = append(clients, c)
 		}
 
-        if p.ID != 0 {
-		// Append the item to the last invoice
-		clients[len(clients)-1].Projects = append(clients[len(clients)-1].Projects, p)
-        }
+		if p.ID != 0 {
+			// Append the item to the last invoice
+			clients[len(clients)-1].Projects = append(clients[len(clients)-1].Projects, p)
+		}
 	}
 	return clients, nil
 }
@@ -203,7 +201,7 @@ func UpdateClient(conn *pgxpool.Pool, client Client, ctx *gin.Context, clientID 
 		client.Phone,
 		client.Address,
 		client.Country,
-	    client.Starred,
+		client.Starred,
 		clientID,
 		userID,
 	)
@@ -223,7 +221,7 @@ func UpdateStarClient(conn *pgxpool.Pool, client StarClient, ctx *gin.Context, c
 	cmd, err := conn.Exec(
 		ctx,
 		queries.UpdateStarClient,
-	    client.Starred,
+		client.Starred,
 		clientID,
 		userID,
 	)

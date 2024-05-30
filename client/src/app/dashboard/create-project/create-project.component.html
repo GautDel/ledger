@@ -1,0 +1,111 @@
+<ng-container *ngIf="toggleCard">
+  <form [formGroup]="projectForm" (ngSubmit)="onSubmit()"
+    class="lg:sticky lg:top-4 flex flex-col gap-4 p-4 lg:border lg:rounded lg:border-neutral-300 absolute bottom-0 left-0 w-full h-full overflow-scroll bg-white lg:h-fit lg:min-w-96">
+
+    <button [ngClass]="{'bg-red-500 hover:bg-red-600': toggleCard}"
+      class="lg:hidden absolute top-4 right-4 bg-blue-600 rounded p-3 hover:bg-blue-700 transition ease-in duration-150"
+      (touchstart)="toggleHandler()" (click)="toggleHandler()">
+      <svg [ngClass]="{'rotate-45': toggleCard}" class="w-4 stroke-white" viewBox="0 0 362 361" fill="none"
+        xmlns="http://www.w3.org/2000/svg">
+        <path d="M331.5 180.5L30.5 180.5" stroke-width="80" stroke-linecap="round" />
+        <path d="M181 30L181 331" stroke-width="80" stroke-linecap="round" />
+      </svg>
+    </button>
+
+    <p class="text-blue-600 font-semibold text-3xl text-center pb-2">Create Project</p>
+
+    <div class="flex flex-col gap-0.5">
+      <label class="font-semibold text-neutral-600 mb-1">Name<span class="text-red-600 font-bold"> *</span></label>
+      <input type="text" placeholder="Ledger Systems"
+        class="border rounded p-2 text-lg text-neutral-600 w-full outline-none hover:border-blue-600 focus:border-blue-600"
+        formControlName="Name" />
+      <app-input-error [errors]="errors" field="Name" />
+    </div>
+
+    <div class="flex flex-col gap-0.5">
+      <label class="font-semibold text-neutral-600 mb-1">Description</label>
+      <textarea type="text" rows="5" placeholder="The best client I've ever had!"
+        class="border rounded p-2 text-lg text-neutral-600 w-full outline-none hover:border-blue-600 focus:border-blue-600"
+        formControlName="Description"></textarea>
+      <app-input-error [errors]="errors" field="Description" />
+    </div>
+
+    <div class="flex flex-col gap-0.5">
+      <label class="font-semibold text-neutral-600 mb-1">Notes</label>
+      <textarea type="text" rows="5" placeholder="The best client I've ever had!"
+        class="border rounded p-2 text-lg text-neutral-600 w-full outline-none hover:border-blue-600 focus:border-blue-600"
+        formControlName="Notes"></textarea>
+      <app-input-error [errors]="errors" field="Notes" />
+    </div>
+
+    <div class="flex flex-col gap-0.5">
+      <label class="font-semibold text-neutral-600 mb-1">Clients<span class="text-red-600 font-bold"> *</span></label>
+
+      <input type="text" placeholder="Jane Doe" (input)="searchClients($event); init = false"
+        class="border rounded p-2 text-lg text-neutral-600 w-full outline-none hover:border-blue-600 focus:border-blue-600" />
+
+      <div class="border rounded mt-2 max-h-52 overflow-y-scroll">
+        <ng-container *ngIf="!init">
+          <ng-container *ngFor="let client of filteredClients;">
+            <div (click)="addClient(client!)"
+              class="w-full border-b p-2 text-neutral-600 hover:bg-blue-600 hover:text-white cursor-pointer last:border-b-0">
+              {{client.FirstName}}</div>
+          </ng-container>
+
+          <ng-container *ngIf="filteredClients.length === 0">
+            <p class="text-neutral-600 text-center p-2 font-semibold">No clients found</p>
+          </ng-container>
+        </ng-container>
+
+        <ng-container *ngIf="init">
+          <ng-container *ngFor="let client of clients;">
+            <div (click)="addClient(client!)"
+              class="w-full border-b p-2 text-neutral-600 hover:bg-blue-600 hover:text-white cursor-pointer last:border-b-0">
+              {{client.FirstName}} {{client.LastName}}</div>
+          </ng-container>
+        </ng-container>
+      </div>
+      <app-input-error [errors]="errors" field="Clients" />
+    </div>
+
+    <div class="flex flex-col gap-0.5">
+      <label class="font-semibold text-neutral-600 mb-1">Chosen Clients <span
+          class="text-neutral-500 text-sm ">(tap/click to remove)</span></label>
+
+      <div class="flex flex-wrap gap-2 mt-4">
+        <ng-container *ngFor="let client of chosenClients; index as i;">
+          <div (click)="removeClient(i)"
+            class="flex gap-1 rounded-full text-white bg-blue-600 px-3 py-1 text-sm font-semibold cursor-pointer hover:bg-blue-700">
+            <p>{{client.FirstName}} {{client.LastName}}</p>
+          </div>
+        </ng-container>
+      </div>
+    </div>
+
+
+
+
+
+
+    <button type="submit" [disabled]="isLoading"
+      class="flex items-center justify-center mt-2 bg-blue-600 w-full font-semibold text-lg text-white py-2 rounded hover:bg-blue-700 transition duration-150 ease-in">
+      <ng-container *ngIf="isLoading">
+        <svg class="animate-spin h-7 w-7" viewBox="0 0 24 24">
+
+          <circle class="fill-transparent stroke-blue-600" cx="12" cy="12" r="10" stroke="" stroke-width="4">
+          </circle>
+          <path class="fill-white"
+            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+          </path>
+
+        </svg>
+      </ng-container>
+      <p *ngIf="!isLoading">Submit</p>
+    </button>
+
+    <ng-container *ngIf="!isLoading">
+      <p class="font-bold text-green-600 w-full text-nowrap text-center">
+        {{success}}</p>
+    </ng-container>
+  </form>
+</ng-container>

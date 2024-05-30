@@ -67,7 +67,7 @@ func New() *gin.Engine {
 
 	projectRouter := router.Group("/projects")
 	{
-		projectRouter.GET("/", getProjects)
+        projectRouter.GET("/sort/:sort", getProjects)
 		projectRouter.POST("/create", createProject)
 		projectRouter.PUT("/update/:id", updateProject)
 		projectRouter.DELETE("/remove/:id", destroyProject)

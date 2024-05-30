@@ -17,7 +17,6 @@ SELECT
     COALESCE(projects.id, 0),
     COALESCE(projects.name, ''),
     COALESCE(projects.description, ''),
-    COALESCE(projects.client_id, 0),
     COALESCE(projects.notes, ''),
     COALESCE(projects.created_at, '1970-01-01 00:00:00'::timestamp),
     COALESCE(projects.updated_at, '1970-01-01 00:00:00'::timestamp)
@@ -42,7 +41,6 @@ SELECT
     COALESCE(projects.id, 0),
     COALESCE(projects.name, ''),
     COALESCE(projects.description, ''),
-    COALESCE(projects.client_id, 0),
     COALESCE(projects.notes, ''),
     COALESCE(projects.created_at, '1970-01-01 00:00:00'::timestamp),
     COALESCE(projects.updated_at, '1970-01-01 00:00:00'::timestamp)
@@ -66,7 +64,6 @@ SELECT
     COALESCE(projects.id, 0),
     COALESCE(projects.name, ''),
     COALESCE(projects.description, ''),
-    COALESCE(projects.client_id, 0),
     COALESCE(projects.notes, ''),
     COALESCE(projects.created_at, '1970-01-01 00:00:00'::timestamp),
     COALESCE(projects.updated_at, '1970-01-01 00:00:00'::timestamp)
@@ -91,7 +88,6 @@ SELECT
     COALESCE(projects.id, 0),
     COALESCE(projects.name, ''),
     COALESCE(projects.description, ''),
-    COALESCE(projects.client_id, 0),
     COALESCE(projects.notes, ''),
     COALESCE(projects.created_at, '1970-01-01 00:00:00'::timestamp),
     COALESCE(projects.updated_at, '1970-01-01 00:00:00'::timestamp)
@@ -116,7 +112,6 @@ SELECT
     COALESCE(projects.id, 0),
     COALESCE(projects.name, ''),
     COALESCE(projects.description, ''),
-    COALESCE(projects.client_id, 0),
     COALESCE(projects.notes, ''),
     COALESCE(projects.created_at, '1970-01-01 00:00:00'::timestamp),
     COALESCE(projects.updated_at, '1970-01-01 00:00:00'::timestamp)
@@ -143,7 +138,6 @@ SELECT
     COALESCE(projects.id, 0),
     COALESCE(projects.name, ''),
     COALESCE(projects.description, ''),
-    COALESCE(projects.client_id, 0),
     COALESCE(projects.notes, ''),
     COALESCE(projects.created_at, '1970-01-01 00:00:00'::timestamp),
     COALESCE(projects.updated_at, '1970-01-01 00:00:00'::timestamp)
@@ -170,7 +164,6 @@ SELECT
     COALESCE(projects.id, 0),
     COALESCE(projects.name, ''),
     COALESCE(projects.description, ''),
-    COALESCE(projects.client_id, 0),
     COALESCE(projects.notes, ''),
     COALESCE(projects.created_at, '1970-01-01 00:00:00'::timestamp),
     COALESCE(projects.updated_at, '1970-01-01 00:00:00'::timestamp)
@@ -197,7 +190,6 @@ SELECT
     COALESCE(projects.id, 0),
     COALESCE(projects.name, ''),
     COALESCE(projects.description, ''),
-    COALESCE(projects.client_id, 0),
     COALESCE(projects.notes, ''),
     COALESCE(projects.created_at, '1970-01-01 00:00:00'::timestamp),
     COALESCE(projects.updated_at, '1970-01-01 00:00:00'::timestamp)

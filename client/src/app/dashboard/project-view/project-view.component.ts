@@ -5,6 +5,7 @@ import { Project } from '../project';
 import { ProjectPreviewComponent } from '../project-preview/project-preview.component';
 import { ProjectService } from '../../services/project.service';
 import { debounceTime, distinctUntilChanged, switchMap, tap } from 'rxjs';
+import { CreateProjectComponent } from '../create-project/create-project.component';
 
 @Component({
   selector: 'app-project-view',
@@ -12,7 +13,8 @@ import { debounceTime, distinctUntilChanged, switchMap, tap } from 'rxjs';
   imports: [
     CommonModule,
     ReactiveFormsModule,
-    ProjectPreviewComponent
+    ProjectPreviewComponent,
+    CreateProjectComponent
   ],
   templateUrl: './project-view.component.html',
   styleUrl: './project-view.component.css'
@@ -27,7 +29,7 @@ export class ProjectViewComponent {
   chosenProject: Project;
   isLoading: boolean = false;
 
-  constructor(private ps: ProjectService) {}
+  constructor(private ps: ProjectService) { }
 
   showProjectCard() {
     this.projectCard = true;
@@ -37,6 +39,11 @@ export class ProjectViewComponent {
 
   rProject(p: Project) {
     this.chosenProject = p;
+  }
+
+  receiveToggle($event: boolean) {
+    this.toggleCard = $event;
+    this.editCard = false;
   }
 
   searchProjects(s: string) {
